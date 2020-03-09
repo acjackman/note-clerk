@@ -4,6 +4,12 @@
 [![PyPI](https://img.shields.io/pypi/v/note-clerk.svg)](https://pypi.org/project/note-clerk/)
 [![Read the Docs](https://readthedocs.org/projects/note-clerk/badge/)](https://note-clerk.readthedocs.io/)
 
+Install development version
+
+```bash
+pip install git+https://github.com/acjackman/note-clerk@master
+```
+
 
 ## Contributing
 
