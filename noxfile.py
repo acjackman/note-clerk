@@ -96,6 +96,14 @@ def tests(session: Session) -> None:
     session.run("pytest", *args)
 
 
+@nox.session(python="3.8")
+def coverage(session: Session) -> None:
+    """Upload coverage data."""
+    install_with_constraints(session, "coverage[toml]", "codecov")
+    session.run("coverage", "xml", "--fail-under=0")
+    session.run("codecov", *session.posargs)
+
+
 @nox.session(python=["3.8", "3.7"])
 def typeguard(session: Session) -> None:
     """Runtime type checking using Typeguard."""
