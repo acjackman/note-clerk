@@ -13,9 +13,4 @@ pip install git+https://github.com/acjackman/note-clerk@master
 
 ## Contributing
 
-
-### Linter
-
-```bash
-nox -rs lint
-```
+See the contributing page in the docs.
