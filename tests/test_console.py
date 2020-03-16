@@ -1,15 +1,8 @@
 """note-clerk application tests."""
 from click.testing import CliRunner
-import pytest
 
 import note_clerk
 from note_clerk import console
-
-
-@pytest.fixture
-def cli_runner() -> CliRunner:
-    """Creates CliRunner instance."""
-    return CliRunner()
 
 
 def test_main(cli_runner: CliRunner) -> None:
@@ -24,3 +17,11 @@ def test_version_option(cli_runner: CliRunner) -> None:
     assert result.exit_code == 0
 
     assert result.output == f"note-clerk, version {note_clerk.__version__}\n"
+
+
+def test_info(cli_runner: CliRunner) -> None:
+    """Test info command."""
+    result = cli_runner.invoke(console.cli, "info")
+    assert result.exit_code == 0
+
+    assert result.output == f'Configuration Directory: "."\n'

@@ -28,7 +28,7 @@ def info(app: App) -> None:
 @click.pass_obj
 def list_files(app: App, paths: Tuple[str]) -> None:
     """List all files selected by the given paths."""
-    if len(paths) == 0:
+    if len(paths) == 0:  # pragma: no cover
         paths = (".",)
 
     for file in _utils.all_files(paths):

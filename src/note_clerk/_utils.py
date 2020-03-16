@@ -24,8 +24,7 @@ def all_files(paths: Iterable[str]) -> Iterator[Path]:
 
 def _all_files(paths: Iterable[Path]) -> Iterator[Path]:
     for file in paths:
-        file_path = Path(file)
-        if file_path.is_dir():
-            yield from file_path.iterdir()
-        else:
-            yield file_path
+        if file.is_dir():  # pragma: no cover
+            yield from file.iterdir()
+        else:  # pragma: no cover
+            yield file
