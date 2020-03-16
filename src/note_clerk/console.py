@@ -33,3 +33,23 @@ def list_files(app: App, paths: Tuple[str]) -> None:
 
     for file in _utils.all_files(paths):
         click.echo(file)
+
+
+@cli.command()
+@click.argument("input", type=click.File())
+@click.pass_obj
+def lint(app: App, input: click.File) -> None:
+    """Lint all files selected by the given paths."""
+    click.echo(input)
+
+
+@cli.command()
+@click.argument("paths", type=click.Path(), nargs=-1)
+@click.pass_obj
+def lint_paths(app: App, paths: Tuple[str]) -> None:
+    """Lint all files selected by the given paths."""
+    if len(paths) == 0:
+        paths = (".",)
+
+    for file in _utils.all_files(paths):
+        click.echo(file)
