@@ -1,7 +1,9 @@
 """Note clerk application."""
+from typing import Tuple
+
 import click
 
-from . import __version__
+from . import __version__, _utils
 from .app import App
 
 
@@ -19,3 +21,15 @@ def cli(ctx: click.Context, config_dir: str) -> None:
 def info(app: App) -> None:
     """Show app configuration."""
     click.echo(f'Configuration Directory: "{app.config_dir}"')
+
+
+@cli.command()
+@click.argument("paths", type=click.Path(), nargs=-1)
+@click.pass_obj
+def list_files(app: App, paths: Tuple[str]) -> None:
+    """List all files selected by the given paths."""
+    if len(paths) == 0:
+        paths = (".",)
+
+    for file in _utils.all_files(paths):
+        click.echo(file)
