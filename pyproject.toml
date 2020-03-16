@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "note-clerk"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Adam Jackman <adam@acjackman.com>"]
 description = "Command to manage plain text notes."
 license = "MIT"
@@ -40,7 +40,7 @@ sphinx-autodoc-typehints = "^1.10.3"
 codecov = "^2.0.16"
 
 [tool.poetry.scripts]
-note-clerk = "note_clerk.console:main"
+note-clerk = "note_clerk.console:cli"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
