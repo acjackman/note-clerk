@@ -23,4 +23,4 @@ def test_version_option(cli_runner: CliRunner) -> None:
     result = cli_runner.invoke(console.cli, "--version")
     assert result.exit_code == 0
 
-    assert result.output == f"main, version {note_clerk.__version__}\n"
+    assert result.output == f"note-clerk, version {note_clerk.__version__}\n"
