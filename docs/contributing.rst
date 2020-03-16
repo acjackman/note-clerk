@@ -45,11 +45,23 @@ Useful Stuff
 
    $ nox -rs tests
 
+-  Run the tests for a single python version
+
+.. code:: console
+
+   $ nox -r --session tests-3.8
+
 -  Run the linter
 
 .. code:: console
 
    $ nox -rs lint
+
+-  Run the linter for a single python version,
+
+.. code:: console
+
+   $ nox -r --sesion lint-3.8
 
 -  Build the docs
 
