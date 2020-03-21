@@ -1,8 +1,8 @@
 """Testing utility fuctions."""
-
+from dataclasses import dataclass
 from inspect import cleandoc as multiline_trim
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, TypedDict
 
 from boltons.setutils import IndexedSet
 
@@ -43,12 +43,23 @@ def _get_from_lists(
     return default
 
 
+class ParamaterizationArgs(TypedDict):
+    argnames: str
+    argvalues: List[Tuple]
+    ids: List[str]
+
+
+class TestCase:
+    id: str
+    name: str
+
+
 def paramaterize_cases(
     cases: List[Tuple[str, Dict[str, Any]]],
     default_values: Optional[Dict[str, Any]] = None,
     fill_none: bool = True,
     fill_default: bool = False,
-) -> Dict:
+) -> ParamaterizationArgs:
     """Create paramaterization from a set of named cases."""
     _default = default_values or {}
     ids = []

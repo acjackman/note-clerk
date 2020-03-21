@@ -9,14 +9,14 @@ import pytest
 
 
 from note_clerk import console
-from ._utils import inline_header, inline_note, paramaterize_cases
+from ._utils import inline_header, inline_note, paramaterize_cases, TestCase
 
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
-class FixCase:
+class FixCase(TestCase):
     """Test case for lint --fix."""
 
     id: str
