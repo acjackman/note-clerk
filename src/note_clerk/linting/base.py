@@ -30,7 +30,7 @@ class LintCheck(ABC):
         """Check line."""
         yield from ()
 
-    def final_errors(self) -> Lints:
+    def check_file(self) -> Lints:
         """Emit any final errors."""
         yield from ()
 
@@ -77,4 +77,4 @@ def lint_file(file: TextIO, filename: Optional[str], checks: LintChecks) -> Lint
 
     # Check final errors
     for c in _checks:
-        yield from c.final_errors()
+        yield from c.check_file()

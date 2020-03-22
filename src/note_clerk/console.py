@@ -37,7 +37,7 @@ def _lint_text(text: TextIO, filename: Optional[str], lint_checks: LintChecks) -
     found_lint = False
     for lint in lint_file(text, filename, lint_checks):
         found_lint = True
-        click.echo(f"{_filename}:{lint.line}:{lint.column}: {lint.error}")
+        click.echo(f"{_filename}:{lint.line}:{lint.column} | {lint.error}")
     return found_lint
 
 
@@ -63,10 +63,10 @@ def lint(ctx: click.Context, app: App, paths: Tuple[str]) -> None:
     else:
         try:
             for file in utils.all_files(paths):
-                log.debug(f"attempting to open {file}")
+                log.debug(f"attempting to open '{file}'")
                 with open(file, "r") as f:
                     log.debug(f"linting '{file}'")
-                    found_lint |= _lint_text(f, file.name, lint_checks)
+                    found_lint |= _lint_text(f, str(file), lint_checks)
         except utils.FilesNotFound as e:
             raise click.BadArgumentUsage(
                 f"All paths should exist, these do not: {utils.quoted_paths(e.missing)}"

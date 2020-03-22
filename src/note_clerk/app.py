@@ -20,6 +20,7 @@ class App:
     @property
     def lint_checks(self) -> LintChecks:
         """List of checks the app is configured for."""
+        log.debug('getting configured checks')
         return [
             checks.CheckHeaderTagsArray,
             checks.CheckHeaderTagsQuoted,
