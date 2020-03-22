@@ -12,15 +12,17 @@ log = logging.getLogger(__name__)
 
 def inline_note(contents: str) -> str:
     """Create a file for testing."""
-    return multiline_trim(contents)
+    return multiline_trim(contents).strip()
 
 
 def inline_header(header: str) -> str:
     """Create a file that is header only."""
+    _contents = multiline_trim(header).strip()
+    log.debug(f"contents: '{_contents}'")
     return inline_note(
         f"""
         ---
-        {multiline_trim(header)}
+        {multiline_trim(header).strip()}
         ---
         """
     )
