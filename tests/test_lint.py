@@ -24,10 +24,13 @@ class LintDetails(TypedDict):
 
 LINT_CASES = [
     ParamCase(
-        id="HEAD_TAG_QUOTED",
+        id="HEAD_TAG_ARRAY",
         description="tags should be a quoted array",
         variables=LintDetails(
-            content=inline_header("tags: #value"), line=2, column=7, error="H0101",
+            content=inline_header("tags: #value"),
+            line=2,
+            column=7,
+            error="head-tag-array",
         ),
     )
 ]
