@@ -27,24 +27,80 @@ LINT_CASES = [
         id="HEAD_TAG_ARRAY",
         description="tags should be a quoted array",
         variables=LintDetails(
-            content=inline_header("tags: #value"),
+            content=inline_header('tags: "#value"'),
             line=2,
-            column=7,
-            error="head-tag-array",
+            column=5,
+            error="header-tags-array",
         ),
     )
 ]
 
 
 @pytest.mark.parametrize(**paramaterize_cases(LINT_CASES))
-def test_lints(
+def test_lint(
     cli_runner: CliRunner, content: str, line: int, column: int, error: str
 ) -> None:
     """Test lints are identified correctly."""
     result = cli_runner.invoke(console.cli, ["lint", "-"], input=content)
 
-    assert result.exit_code == 1
-    assert result.output == f"stdin:{line}:{column}: {error}"
+    print(result.output, end="")
+
+    assert result.exit_code == 10
+    assert result.output == f"stdin:{line}:{column}: {error}\n"
+
+
+@pytest.mark.parametrize(**paramaterize_cases(LINT_CASES))
+def test_lint_multiple_stdin_errors(
+    cli_runner: CliRunner, content: str, line: int, column: int, error: str
+) -> None:
+    """Test multiple standard inputs are discarded."""
+    result = cli_runner.invoke(console.cli, ["lint", "-", "-"], input=content)
+
+    print(result.output, end="")
+
+    assert result.exit_code == 2
+    assert console.STD_IN_INDEPENDENT in result.output
+
+
+@pytest.mark.parametrize(**paramaterize_cases(LINT_CASES))
+def test_lint_mixed_stdin_files_errors(
+    cli_runner: CliRunner, content: str, line: int, column: int, error: str
+) -> None:
+    """Test multiple standard inputs are discarded."""
+    result = cli_runner.invoke(console.cli, ["lint", "-", "foo.txt"], input=content)
+
+    print(result.output, end="")
+
+    assert result.exit_code == 2
+    assert console.STD_IN_INDEPENDENT in result.output
+
+
+@pytest.mark.parametrize(**paramaterize_cases(LINT_CASES))
+def test_lint_file_does_not_exist(
+    cli_runner: CliRunner, content: str, line: int, column: int, error: str
+) -> None:
+    """Test multiple standard inputs are discarded."""
+    result = cli_runner.invoke(console.cli, ["lint", "foo.txt"], input=content)
+
+    print(result.output, end="")
+
+    assert result.exit_code == 2
+    assert 'All paths should exist, these do not: "foo.txt"' in result.output
+
+
+@pytest.mark.parametrize(**paramaterize_cases(LINT_CASES))
+def test_lint_multiple_files_do_not_exist(
+    cli_runner: CliRunner, content: str, line: int, column: int, error: str
+) -> None:
+    """Test multiple standard inputs are discarded."""
+    result = cli_runner.invoke(
+        console.cli, ["lint", "foo.txt", "bar.txt"], input=content
+    )
+
+    print(result.output, end="")
+
+    assert result.exit_code == 2
+    assert 'All paths should exist, these do not: "foo.txt" "bar.txt"' in result.output
 
 
 class FixDetails(TypedDict):
@@ -134,7 +190,7 @@ NOTE_FIX_CASES = [
 ]
 
 
-@pytest.mark.xfail(strict=True)
+@pytest.mark.skip()
 @pytest.mark.parametrize(**paramaterize_cases(NOTE_FIX_CASES))
 def test_fixes(cli_runner: CliRunner, content: str, corrected: str) -> None:
     """Test fix applies the correct."""
@@ -144,7 +200,7 @@ def test_fixes(cli_runner: CliRunner, content: str, corrected: str) -> None:
     assert result.output == corrected
 
 
-@pytest.mark.xfail(strict=True)
+@pytest.mark.skip()
 def test_lint_files(cli_runner: CliRunner) -> None:
     """Test applies lint to all files given."""
     result = cli_runner.invoke(console.cli, ["lint-paths"])

@@ -2,11 +2,12 @@
 
 from io import StringIO
 import logging
-from typing import Optional, TypedDict, Iterable, Callable
+from typing import Optional, TypedDict
 
 import pytest
 
 from note_clerk import linting
+from note_clerk.linting import checks
 from ._utils import inline_header, paramaterize_cases, ParamCase
 
 
@@ -16,7 +17,7 @@ log = logging.getLogger(__name__)
 class LintDetails(TypedDict):
     """Parameterized details for linting errors."""
 
-    checks: Iterable[linting.LintCheck]
+    checks: linting.LintChecks
     content: str
     line: int
     column: int
@@ -26,7 +27,7 @@ class LintDetails(TypedDict):
 class CleanDetails(TypedDict):
     """Parameterized details for linting errors."""
 
-    checks: Iterable[linting.LintCheck]
+    checks: linting.LintChecks
     content: str
 
 
@@ -35,7 +36,7 @@ LINT_CASES = [
         id="HEAD_TAGS_ARRAY_PASS",
         description="tags should be a quoted array",
         variables=CleanDetails(
-            checks=[linting.check_header_tags_array],
+            checks=[checks.CheckHeaderTagsArray],
             content=inline_header('tags: ["#value"]'),
         ),
     ),
@@ -43,7 +44,7 @@ LINT_CASES = [
         id="HEAD_TAGS_ARRAY",
         description="tags should be a quoted array",
         variables=LintDetails(
-            checks=[linting.check_header_tags_array],
+            checks=[checks.CheckHeaderTagsArray],
             content=inline_header('tags: "#value"'),
             line=2,
             column=5,
@@ -54,7 +55,7 @@ LINT_CASES = [
         id="HEAD_TAGS_QUOTED_1",
         description="tags should be a quoted array",
         variables=LintDetails(
-            checks=[linting.check_header_tags_quoted],
+            checks=[checks.CheckHeaderTagsQuoted],
             content=inline_header("tags: [#value]"),
             line=2,
             column=7,
@@ -65,7 +66,7 @@ LINT_CASES = [
         id="HEAD_TAGS_QUOTED_PASS",
         description="Quoted array should pass",
         variables=CleanDetails(
-            checks=[linting.check_header_tags_quoted],
+            checks=[checks.CheckHeaderTagsQuoted],
             content=inline_header('tags: ["#value"]'),
         ),
     ),
@@ -73,7 +74,7 @@ LINT_CASES = [
         id="HEAD_TAGS_QUOTED_PASS_SINGLE_QUOTE",
         description="Quoted array should pass",
         variables=CleanDetails(
-            checks=[linting.check_header_tags_quoted],
+            checks=[checks.CheckHeaderTagsQuoted],
             content=inline_header("tags: ['#value']"),
         ),
     ),
@@ -82,11 +83,15 @@ LINT_CASES = [
 
 @pytest.mark.parametrize(**paramaterize_cases(LINT_CASES))
 def test_lints(
-    content: str, line: Optional[int], column: Optional[int], error: Optional[str], checks: Iterable[Callable]
+    content: str,
+    line: Optional[int],
+    column: Optional[int],
+    error: Optional[str],
+    checks: linting.LintChecks,
 ) -> None:
     """Test lints are identified correctly."""
-    lints = linting.lint_file(
-        file=StringIO(content), filename="stdin", checks=checks,
+    lints = list(
+        linting.lint_file(file=StringIO(content), filename="stdin", checks=checks,)
     )
 
     if error and line and column:
