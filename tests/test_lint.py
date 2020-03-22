@@ -1,110 +1,138 @@
 """Test general note linting."""
-from dataclasses import dataclass
 import logging
-from typing import Any, Dict, List, Optional
+from typing import TypedDict
 
-from boltons.setutils import IndexedSet
 from click.testing import CliRunner
 import pytest
 
 
 from note_clerk import console
-from ._utils import inline_header, inline_note, paramaterize_cases, TestCase
+from ._utils import inline_header, inline_note, paramaterize_cases, ParamCase
 
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True)
-class FixCase(TestCase):
-    """Test case for lint --fix."""
+class LintDetails(TypedDict):
+    """Parameterized details for linting errors."""
 
-    id: str
-    name: str
+    content: str
+    line: int
+    column: int
+    error: str
+
+
+LINT_CASES = [
+    ParamCase(
+        id="HEAD_TAG_QUOTED",
+        description="tags should be a quoted array",
+        variables=LintDetails(
+            content=inline_header("tags: #value"), line=2, column=7, error="H0101",
+        ),
+    )
+]
+
+
+@pytest.mark.parametrize(**paramaterize_cases(LINT_CASES))
+def test_lints(
+    cli_runner: CliRunner, content: str, line: int, column: int, error: str
+) -> None:
+    """Test lints are identified correctly."""
+    result = cli_runner.invoke(console.cli, ["lint", "-"], input=content)
+
+    assert result.exit_code == 1
+    assert result.output == f"stdin:{line}:{column}: {error}"
+
+
+class FixDetails(TypedDict):
+    """Parameterized details for lint --fix."""
+
     content: str
     corrected: str
 
 
-def _build_fix_cases(cases: List[FixCase]) -> Dict:
-    _cases = paramaterize_cases([
-        (c.id, dict(content=c.content, corrected=c.corrected))
-        for c in cases
-    ])
-
-    return _cases
-
-
-NOTE_FIX_CASES = _build_fix_cases([
-    FixCase(
+NOTE_FIX_CASES = [
+    ParamCase(
         id="HEAD_TAG_ARRAY",
-        name="make array",
-        content=inline_header("tags: #value"),
-        corrected=inline_header('tags: ["#value"]'),
+        description="make array",
+        variables=FixDetails(
+            content=inline_header("tags: #value"),
+            corrected=inline_header('tags: ["#value"]'),
+        ),
     ),
-    FixCase(
+    ParamCase(
         id="HEAD_TAG_ARRAY_MULTIPLE",
-        name="make tag aray with multiple",
-        content=inline_header("tags: #value, #value1, #value-2, #thing_three"),
-        corrected=inline_header(
-            """
-            tags: ["#value", "#value1", "#value-2", "#thing_three"]
-            """
+        description="make tag aray with multiple",
+        variables=FixDetails(
+            content=inline_header("tags: #value, #value1, #value-2, #thing_three"),
+            corrected=inline_header(
+                """
+                tags: ["#value", "#value1", "#value-2", "#thing_three"]
+                """
+            ),
         ),
     ),
-    FixCase(
+    ParamCase(
         id="HEAD_TAG_QUOTES",
-        name="fix quotes in array",
-        content=inline_header("tags: [“#value”]"),
-        corrected=inline_header('tags: ["#value"]'),
+        description="fix quotes in array",
+        variables=FixDetails(
+            content=inline_header("tags: [“#value”]"),
+            corrected=inline_header('tags: ["#value"]'),
+        ),
     ),
-    FixCase(
+    ParamCase(
         id="HEAD_COMBINE",
-        name="combines multiple yaml together",
-        content=inline_note(
-            """
-            ---
-            key1: value1
-            ---
-            ---
-            key2: value2
-            ---
-            """
-        ),
-        corrected=inline_note(
-            """
-            ---
-            key1: value1
-            key2: value2
-            ---
-            """
+        description="combines multiple yaml together",
+        variables=FixDetails(
+            content=inline_note(
+                """
+                ---
+                key1: value1
+                ---
+                ---
+                key2: value2
+                ---
+                """
+            ),
+            corrected=inline_note(
+                """
+                ---
+                key1: value1
+                key2: value2
+                ---
+                """
+            ),
         ),
     ),
-    FixCase(
+    ParamCase(
         id="HEAD_COMBINE_MULI_KEY",
-        name="combines multiple yaml together maintains multiple key values",
-        content=inline_note(
-            """
-            ---
-            key1: value1
-            ---
-            ---
-            key1: value2
-            ---
-            """
-        ),
-        corrected=inline_note(
-            """
-            ---
-            key1: value1
-            key1: value2
-            ---
-            """
+        description="combines multiple yaml together maintains multiple key values",
+        variables=FixDetails(
+            content=inline_note(
+                """
+                ---
+                key1: value1
+                ---
+                ---
+                key1: value2
+                ---
+                """
+            ),
+            corrected=inline_note(
+                """
+                ---
+                key1: value1
+                key1: value2
+                ---
+                """
+            ),
         ),
     ),
-])
+]
 
 
-@pytest.mark.parametrize(**NOTE_FIX_CASES)
+@pytest.mark.xfail(strict=True)
+@pytest.mark.parametrize(**paramaterize_cases(NOTE_FIX_CASES))
 def test_fixes(cli_runner: CliRunner, content: str, corrected: str) -> None:
     """Test fix applies the correct."""
     result = cli_runner.invoke(console.cli, ["lint", "--fix", "-"])
@@ -113,8 +141,9 @@ def test_fixes(cli_runner: CliRunner, content: str, corrected: str) -> None:
     assert result.output == corrected
 
 
+@pytest.mark.xfail(strict=True)
 def test_lint_files(cli_runner: CliRunner) -> None:
     """Test applies lint to all files given."""
     result = cli_runner.invoke(console.cli, ["lint-paths"])
 
-    assert result.exit_code == 0
+    assert result.exit_code == 0, "\n" + result.output

@@ -2,9 +2,9 @@
 from dataclasses import dataclass
 from inspect import cleandoc as multiline_trim
 import logging
-from typing import Any, Dict, List, Optional, Tuple, TypedDict
+from typing import Any, List, Mapping, Optional, Tuple, TypedDict
 
-from boltons.setutils import IndexedSet
+from boltons.setutils import IndexedSet  # type: ignore
 
 
 log = logging.getLogger(__name__)
@@ -26,8 +26,31 @@ def inline_header(header: str) -> str:
     )
 
 
+ParamaterizationVars = Mapping[str, Any]
+
+
+class ParamaterizationArgs(TypedDict):
+    """Arguments for the pytest.mark.paramaterize function."""
+
+    argnames: str
+    argvalues: List[Tuple]
+    ids: List[str]
+
+
+@dataclass(frozen=True)
+class ParamCase:
+    """Paramatarized test case."""
+
+    id: str
+    description: Optional[str]
+    variables: ParamaterizationVars
+
+
 def _get_from_lists(
-    key: str, lists: List[Dict], default: Any = None, raise_error: bool = False
+    key: str,
+    lists: List[ParamaterizationVars],
+    default: Any = None,
+    raise_error: bool = False,
 ) -> Any:
     """Return the first instance of key in list of dictionaries."""
     for l in lists:
@@ -43,36 +66,29 @@ def _get_from_lists(
     return default
 
 
-class ParamaterizationArgs(TypedDict):
-    argnames: str
-    argvalues: List[Tuple]
-    ids: List[str]
-
-
-class TestCase:
-    id: str
-    name: str
-
-
 def paramaterize_cases(
-    cases: List[Tuple[str, Dict[str, Any]]],
-    default_values: Optional[Dict[str, Any]] = None,
+    cases: List[ParamCase],
+    default_values: Optional[ParamaterizationVars] = None,
     fill_none: bool = True,
     fill_default: bool = False,
 ) -> ParamaterizationArgs:
     """Create paramaterization from a set of named cases."""
     _default = default_values or {}
-    ids = []
+
+    # Build the list of paramaterized values
     argnames = IndexedSet()
     if fill_default:
         argnames |= IndexedSet(_default.keys())
+
+    # Build list case ids, values, and add any argnames that weren't in default
+    ids = []
     case_values = []
+    for case in cases:
+        ids.append(case.id)
+        argnames |= IndexedSet(case.variables.keys())
+        case_values.append(case.variables)
 
-    for case_id, case_vars in cases:
-        ids.append(case_id)
-        argnames |= IndexedSet(case_vars.keys())
-        case_values.append(case_vars)
-
+    # Convert argnames to a list once we have identified all posibilities
     argnames = list(argnames)
 
     # Build list of tuples of values
@@ -85,8 +101,5 @@ def paramaterize_cases(
         )
         for values in case_values
     ]
-    return {
-        "argnames": argnames,
-        "argvalues": argvalues,
-        "ids": ids,
-    }
+
+    return ParamaterizationArgs(argnames=argnames, argvalues=argvalues, ids=ids,)
