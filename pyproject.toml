@@ -10,7 +10,7 @@ repository = "https://github.com/<your-username>/hypermodern-python"
 documentation = "https://note-clerk.readthedocs.io"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 click = "^7.0"
 requests = "^2.23.0"
 desert = "^2020.1.6"
@@ -30,7 +30,7 @@ flake8-bugbear = "^20.1.4"
 flake8-import-order = "^0.18.1"
 safety = "^1.8.5"
 mypy = "^0.761"
-pytype = {version = "^2020.2.20", python = "3.7"}
+# pytype = {version = "^2020.2.20", python = "3.7"}
 typeguard = "^2.7.1"
 flake8-annotations = "^2.0.1"
 flake8-docstrings = "^1.5.0"

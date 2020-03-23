@@ -6,8 +6,7 @@ from typing import List, TypedDict
 
 import pytest
 
-from note_clerk import linting
-from note_clerk.linting import checks
+from note_clerk import checks, linting
 from ..._utils import inline_header, paramaterize_cases, ParamCase
 
 

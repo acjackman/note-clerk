@@ -3,8 +3,8 @@
 import logging
 from pathlib import Path
 
-from .linting import checks, LintChecks
-
+from . import checks
+from .linting import LintChecks
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class App:
     @property
     def lint_checks(self) -> LintChecks:
         """List of checks the app is configured for."""
-        log.debug('getting configured checks')
+        log.debug("getting configured checks")
         return [
             checks.CheckHeaderTagsArray,
             checks.CheckHeaderTagsQuoted,

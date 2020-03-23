@@ -1,4 +1,4 @@
-from ..base import HeaderCheck, LintError, Lints
+from ..linting import HeaderCheck, LintError, Lints
 
 
 class CheckHeaderTagsArray(HeaderCheck):

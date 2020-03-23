@@ -48,7 +48,7 @@ def _lint_text(text: TextIO, filename: Optional[str], lint_checks: LintChecks) -
 def lint(ctx: click.Context, app: App, paths: Tuple[str]) -> None:
     """Lint all files selected by the given paths."""
     _paths = list(paths)
-    log.debug(f"{_paths=}")
+    log.debug(f"_paths={_paths}")
 
     # TODO: checks should come from plugins
     lint_checks = app.lint_checks

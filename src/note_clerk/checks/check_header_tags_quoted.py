@@ -1,7 +1,7 @@
 import logging
 import re
 
-from ..base import HeaderCheck, LintError, Lints
+from ..linting import HeaderCheck, LintError, Lints
 
 log = logging.getLogger(__name__)
 

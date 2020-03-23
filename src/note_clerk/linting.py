@@ -78,3 +78,13 @@ def lint_file(file: TextIO, filename: Optional[str], checks: LintChecks) -> Lint
     # Check final errors
     for c in _checks:
         yield from c.check_file()
+
+
+__all__ = [
+    "HeaderCheck",
+    "lint_file",
+    "LintCheck",
+    "LintChecks",
+    "LintError",
+    "Lints",
+]
