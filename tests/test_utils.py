@@ -4,7 +4,7 @@ from typing import Callable
 
 import pytest
 
-from note_clerk import _utils
+from note_clerk import utils
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ class TestAllFiles:
     def test_empty_directory(self, tmpdir) -> None:  # noqa: ANN001, ANN101
         """Test empty directory."""
         tmp = Path(str(tmpdir))
-        full_list = list(_utils._all_files((tmp,)))
+        full_list = list(utils._all_files((tmp,)))
 
         assert full_list == []
 
@@ -35,7 +35,7 @@ class TestAllFiles:
     def test_directory_with_no_file(self, tmpdir) -> None:  # noqa: ANN001, ANN101
         """Test empty directory."""
         tmp = Path(str(tmpdir))
-        full_list = list(_utils._all_files((tmp,)))
+        full_list = list(utils._all_files((tmp,)))
 
         assert full_list == []
 
@@ -45,7 +45,7 @@ class TestAllFiles:
         """Test empty directory."""
         f = file_factory("hello.txt")
 
-        full_list = list(_utils._all_files((f,)))
+        full_list = list(utils._all_files((f,)))
 
         assert full_list == [f]
 
@@ -58,6 +58,6 @@ class TestAllFiles:
         f = file_factory("hello.txt")
         f2 = file_factory("test2.txt")
 
-        full_list = list(_utils._all_files((tmp,)))
+        full_list = list(utils._all_files((tmp,)))
 
         assert set(full_list) == set([f, f2])

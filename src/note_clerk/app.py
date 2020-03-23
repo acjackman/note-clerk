@@ -3,6 +3,8 @@
 import logging
 from pathlib import Path
 
+from . import checks
+from .linting import LintChecks
 
 log = logging.getLogger(__name__)
 
@@ -14,3 +16,12 @@ class App:
         """Initialize with config directory."""
         self.config_dir = Path(config_dir or ".").expanduser()
         log.info(f'Note Clerk using config dir: "{self.config_dir}"')
+
+    @property
+    def lint_checks(self) -> LintChecks:
+        """List of checks the app is configured for."""
+        log.debug("getting configured checks")
+        return [
+            checks.CheckHeaderTagsArray,
+            checks.CheckHeaderTagsQuoted,
+        ]
