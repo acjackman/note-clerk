@@ -2,28 +2,14 @@
 
 from io import StringIO
 import logging
-from typing import List, TypedDict
 
 import pytest
 
 from note_clerk import checks, linting
+from .utils import LintDetails, LintErrors
 from ..._utils import inline_header, paramaterize_cases, ParamCase
 
-
 log = logging.getLogger(__name__)
-
-
-class LintDetails(TypedDict):
-    """Parameterized details for linting errors."""
-
-    content: str
-    errors: List[linting.LintError]
-
-
-class CleanDetails(TypedDict):
-    """Parameterized details for linting errors."""
-
-    content: str
 
 
 LINT_CASES = [
@@ -67,7 +53,7 @@ LINT_CASES = [
 
 
 @pytest.mark.parametrize(**paramaterize_cases(LINT_CASES))
-def test_lints(content: str, errors: List[linting.LintError],) -> None:
+def test_lints(content: str, errors: LintErrors,) -> None:
     """Test lints are identified correctly."""
     lints = list(
         linting.lint_file(
