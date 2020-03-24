@@ -1,13 +1,14 @@
 """Note clerk application."""
+from functools import reduce
 import logging
 import sys
-from typing import Optional, TextIO, Tuple
+from typing import Callable, Iterable, Optional, TextIO, Tuple, TypeVar
 
 import click
 
 from . import __version__, utils
 from .app import App
-from .linting import lint_file, LintChecks
+from .linting import lint_file
 
 
 log = logging.getLogger(__name__)
@@ -32,13 +33,28 @@ def info(app: App) -> None:
     click.echo(f'Configuration Directory: "{app.config_dir}"')
 
 
-def _lint_text(text: TextIO, filename: Optional[str], lint_checks: LintChecks) -> bool:
-    _filename = filename or "stdin"
-    found_lint = False
-    for lint in lint_file(text, filename, lint_checks):
-        found_lint = True
-        click.echo(f"{_filename}:{lint.line}:{lint.column} | {lint.error}")
-    return found_lint
+T = TypeVar("T")
+TextAction = Callable[[TextIO, Optional[str]], T]
+
+
+def _apply_to_paths(
+    ctx: click.Context, app: App, paths: Tuple[str], action: TextAction
+) -> Iterable[T]:
+    _paths = list(paths)
+
+    if _paths.count("-") > 0 and _paths != ["-"]:
+        raise click.BadArgumentUsage(STD_IN_INDEPENDENT)
+    if _paths == ["-"]:
+        yield action(sys.stdin, None)
+    else:
+        try:
+            for file in utils.all_files(paths):
+                with open(file, "r") as f:
+                    yield action(f, str(file))
+        except utils.FilesNotFound as e:
+            raise click.BadArgumentUsage(
+                f"All paths should exist, these do not: {utils.quoted_paths(e.missing)}"
+            ) from e
 
 
 @cli.command()
@@ -47,30 +63,19 @@ def _lint_text(text: TextIO, filename: Optional[str], lint_checks: LintChecks) -
 @click.pass_context
 def lint(ctx: click.Context, app: App, paths: Tuple[str]) -> None:
     """Lint all files selected by the given paths."""
-    _paths = list(paths)
-    log.debug(f"_paths={_paths}")
-
     # TODO: checks should come from plugins
     lint_checks = app.lint_checks
-    found_lint = False
 
-    if _paths.count("-") > 0 and _paths != ["-"]:
-        raise click.BadArgumentUsage(STD_IN_INDEPENDENT)
+    def _lint_text(text: TextIO, filename: Optional[str]) -> bool:
+        _filename = filename or "stdin"
+        found_lint = False
+        for lint in lint_file(text, filename, lint_checks):
+            found_lint = True
+            click.echo(f"{_filename}:{lint.line}:{lint.column} | {lint.error}")
+        return found_lint
 
-    if _paths == ["-"]:
-        log.debug("linting stdin")
-        found_lint |= _lint_text(sys.stdin, None, lint_checks)
-    else:
-        try:
-            for file in utils.all_files(paths):
-                log.debug(f"attempting to open '{file}'")
-                with open(file, "r") as f:
-                    log.debug(f"linting '{file}'")
-                    found_lint |= _lint_text(f, str(file), lint_checks)
-        except utils.FilesNotFound as e:
-            raise click.BadArgumentUsage(
-                f"All paths should exist, these do not: {utils.quoted_paths(e.missing)}"
-            ) from e
+    either: Callable[[bool, bool], bool] = lambda x, y: x | y
 
+    found_lint = reduce(either, _apply_to_paths(ctx, app, paths, _lint_text),)
     if found_lint:
         ctx.exit(10)
