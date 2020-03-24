@@ -2,8 +2,10 @@
 
 from .check_header_tags_array import CheckHeaderTagsArray
 from .check_header_tags_quoted import CheckHeaderTagsQuoted
+from .check_header_type_leading_slash import CheckHeaderTypeLeadingSlash
 
 __all__ = [
     "CheckHeaderTagsArray",
     "CheckHeaderTagsQuoted",
+    "CheckHeaderTypeLeadingSlash",
 ]
