@@ -192,6 +192,22 @@ def test_lint_multiple_files_do_not_exist(
     assert 'All paths should exist, these do not: "foo.txt" "bar.txt"' in result.output
 
 
+def test_lint_binary_file(cli_runner: CliRunner, checks_mock: PropertyMock) -> None:
+    """Test multiple standard inputs are discarded."""
+    TEST_FILE = "foo.txt"
+
+    with cli_runner.isolated_filesystem():
+        with open(TEST_FILE, "wb") as f:
+            f.write(
+                b"\x93Y2\xc1\xf8\xc2\xb7\xbe\xe0\xe8\xc4\x18\xcd')Bx^_\xdf_5\xd7\xb7"
+            )
+        result = cli_runner.invoke(console.cli, ["lint", TEST_FILE])
+
+    print(result.output, end="")
+
+    assert result.exit_code == 0
+
+
 class FixDetails(TypedDict):
     """Parameterized details for lint --fix."""
 

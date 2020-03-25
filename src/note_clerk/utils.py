@@ -36,7 +36,7 @@ def all_files(paths: Iterable[str], check_missing: bool = True) -> Iterator[Path
     if missing:
         raise FilesNotFound(missing)
 
-    yield from iterutils.unique_iter(_all_files(_paths))
+    yield from iterutils.unique_iter(filter(lambda f: f.is_file(), _all_files(_paths)))
 
 
 def _all_files(paths: Iterable[Path]) -> Iterator[Path]:
