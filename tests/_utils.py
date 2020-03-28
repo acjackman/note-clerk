@@ -44,8 +44,8 @@ class ParamCase:
     """Paramatarized test case."""
 
     id: str
-    description: Optional[str]
     variables: ParamaterizationVars
+    description: Optional[str] = None
 
 
 def _get_from_lists(

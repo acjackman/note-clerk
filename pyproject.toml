@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "note-clerk"
-version = "0.0.7"
+version = "0.0.8"
 authors = ["Adam Jackman <adam@acjackman.com>"]
 description = "Command to manage plain text notes."
 license = "MIT"
@@ -16,6 +16,7 @@ requests = "^2.23.0"
 desert = "^2020.1.6"
 marshmallow = "^3.5.1"
 boltons = "^20.0.0"
+python-frontmatter = "^0.5.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.3.5"

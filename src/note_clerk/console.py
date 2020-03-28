@@ -2,12 +2,15 @@
 from dataclasses import dataclass
 from enum import Enum
 from functools import reduce
+import json
 import logging
 import re
 import sys
 from typing import Callable, Iterable, Optional, TextIO, Tuple, TypeVar
 
 import click
+import frontmatter
+import yaml
 
 from . import __version__, utils
 from .app import App
@@ -66,8 +69,8 @@ def _apply_to_paths(paths: Tuple[str], action: TextAction) -> Iterable[T]:
         try:
             for path in utils.all_files(paths):
                 try:
+                    log.debug(f"attempting to open '{path}'")
                     with open(path, "r") as f:
-                        log.debug(path)
                         yield from action(f, str(path))
                 except UnicodeDecodeError:
                     unicode_log.warning(f'Unable to open "{path}", not unicode.')
@@ -169,6 +172,51 @@ def list_tags(app: App, paths: Tuple[str]) -> None:
                     ft.tag,  # type: ignore
                     f"'{ft.filename}:{ft.line}:{ft.column}'",  # type: ignore
                     ft.tag_location.name,  # type: ignore
+                ]
+            )
+        )
+
+
+@dataclass
+class FileValue:
+    """Value along with file location it was found in."""
+
+    value: str
+    filepath: Optional[str]
+    line: Optional[int] = None
+    column: Optional[int] = None
+
+    def file_location(self) -> str:
+        """Return specified file location."""
+        location = self.filepath or ""
+        if self.line:
+            location += f":{self.line}"
+            if self.column:
+                location += f":{self.column}"
+        return location
+
+
+@analyze.command()
+@click.argument("paths", nargs=-1, type=click.Path())
+@click.pass_obj
+def list_types(app: App, paths: Tuple[str]) -> None:
+    """List all types in given notes."""
+
+    def _list_types(text: TextIO, filename: Optional[str]) -> Iterable[FileValue]:
+        # log.debug(f"{text=} {filename=}")
+        try:
+            metadata, content = frontmatter.parse(text.read())
+            yield FileValue(metadata["type"], filename)
+        except (KeyError, yaml.parser.ParserError, json.decoder.JSONDecodeError):
+            pass
+
+    fv: FileValue
+    for fv in _apply_to_paths(paths, _list_types):
+        click.echo(
+            "\t".join(
+                [
+                    fv.value,  # type: ignore
+                    f"'{fv.file_location()}'",  # type: ignore
                 ]
             )
         )
