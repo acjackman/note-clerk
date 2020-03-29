@@ -17,4 +17,4 @@ class CheckHeaderTagsQuoted(HeaderCheck):
 
         if self.in_header and line != "---\n":
             for m in self.TAG_QUOTED.finditer(line):
-                yield LintError(line_num, m.start(), "header-tags-quoted")
+                yield LintError("header-tags-quoted", line_num, m.start())

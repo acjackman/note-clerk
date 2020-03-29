@@ -59,7 +59,7 @@ class LineCheck(linting.LintCheck):
         yield from super().check_line(line, line_num)
 
         if line_num == 1:
-            yield linting.LintError(line_num, 1, "a-fake-error")
+            yield linting.LintError("a-fake-error", line_num, 1)
 
 
 @pytest.fixture
