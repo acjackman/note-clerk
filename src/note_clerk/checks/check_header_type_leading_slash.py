@@ -10,4 +10,4 @@ class CheckHeaderTypeLeadingSlash(HeaderCheck):
 
         if self.in_header and line.startswith("type:"):
             if line.startswith("type: /"):
-                yield LintError(line_num, 7, "header-type-leading-slash")
+                yield LintError("header-type-leading-slash", line_num, 7)
