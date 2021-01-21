@@ -3,7 +3,7 @@ import logging
 from click.testing import CliRunner
 
 from note_clerk import console
-from ._utils import inline_note
+from ._utils import inline_note, show_output
 
 
 log = logging.getLogger(__name__)
@@ -40,8 +40,7 @@ def test_fix_collapses_headers(cli_runner: CliRunner) -> None:
     result = cli_runner.invoke(
         console.cli, ["--log-level=DEBUG", "fix", "-"], input=original
     )
-
-    print(result.output)
+    show_output(result)
 
     assert result.output == fixed
 

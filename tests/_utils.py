@@ -5,6 +5,7 @@ import logging
 from typing import Any, List, Mapping, Optional, Tuple, TypedDict
 
 from boltons.setutils import IndexedSet  # type: ignore
+import click.testing
 
 
 log = logging.getLogger(__name__)
@@ -109,3 +110,14 @@ def paramaterize_cases(
         argvalues=argvalues,
         ids=ids,
     )
+
+
+def show_output(result: click.testing.Result) -> None:
+    print("# stdout" + "#" * 50)
+    print(result.stdout)
+    print("# stderr" + "#" * 50)
+    try:
+        print(result.stderr)
+    except ValueError:
+        pass
+    print("#" * 58)

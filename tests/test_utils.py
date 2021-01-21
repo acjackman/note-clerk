@@ -1,5 +1,4 @@
 """Test the utils."""
-from inspect import cleandoc as trim
 from pathlib import Path
 import textwrap
 from typing import Callable
@@ -7,6 +6,7 @@ from typing import Callable
 import pytest
 
 from note_clerk import utils
+from ._utils import inline_note
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ class TestAllFiles:
 
 HEADERS = [
     (
-        trim(
+        inline_note(
             """
             # Note
             """
@@ -75,7 +75,26 @@ HEADERS = [
         0,
     ),
     (
-        trim(
+        inline_note(
+            """
+            # Note with line
+            ---
+            has content
+            """
+        ),
+        0,
+    ),
+    (
+        inline_note(
+            """
+            ***
+            # Note
+            """
+        ),
+        0,
+    ),
+    (
+        inline_note(
             """
             ---
             ---
@@ -85,7 +104,7 @@ HEADERS = [
         2,
     ),
     (
-        trim(
+        inline_note(
             """
             ---
             thing1: true
@@ -96,7 +115,7 @@ HEADERS = [
         3,
     ),
     (
-        trim(
+        inline_note(
             """
             ---
             thing1: true
@@ -109,7 +128,21 @@ HEADERS = [
         5,
     ),
     (
-        trim(
+        inline_note(
+            """
+            ---
+            thing1: true
+            ---
+            ---
+            thing2: true
+            ---
+            # Note
+            """
+        ),
+        6,
+    ),
+    (
+        inline_note(
             """
             ---
             thing1: true
@@ -123,7 +156,7 @@ HEADERS = [
         5,
     ),
     (
-        trim(
+        inline_note(
             """
             ---
             thing1: true
@@ -134,7 +167,21 @@ HEADERS = [
         ),
         3,
     ),
+    (
+        inline_note(
+            """
+            ---
+            ***
+            ***
+            """
+        ),
+        2,
+    ),
 ]
+
+
+def print_text(label: str, value: str) -> None:
+    print(f"{label}:\n{textwrap.indent(value, ' ' * 4)}")
 
 
 @pytest.mark.parametrize("text,header_lines", HEADERS)
@@ -143,17 +190,18 @@ def test_extract_header(text: str, header_lines: int) -> None:
     correct_header = "\n".join(lines[:header_lines])
     correct_body = "\n".join(lines[header_lines:])
 
-    print("Correct Header:")
-    print(textwrap.indent(correct_header, " " * 4))
-    print("Correct Body:")
-    print(textwrap.indent(correct_body, " " * 4))
+    print_text("Correct Header", correct_header)
+    print_text("Correct Body", correct_body)
 
     header, body = utils.split_header(lines)
 
-    print("Header:")
-    print(textwrap.indent(header, " " * 4))
-    print("Body:")
-    print(textwrap.indent(body, " " * 4))
+    print_text("Header", header)
+    print_text("Body", body)
 
     assert header == correct_header
     assert body == correct_body
+
+
+def test_ensure_newline() -> None:
+    assert utils.ensure_newline("") == "\n"
+    assert utils.ensure_newline("\n") == "\n"

@@ -1,9 +1,12 @@
 """Utility Functions for NoteClerk."""
 
+import logging
 from pathlib import Path
 from typing import Iterable, Iterator, List, Sequence, Tuple
 
 from boltons import iterutils
+
+logger = logging.getLogger(__name__)
 
 
 class FilesNotFound(Exception):
@@ -80,6 +83,7 @@ def split_header(lines: Sequence[str]) -> Tuple[str, str]:
     for _i, line in enumerate(lines):
         if doc:
             doc.append(line)
+
         if line == DOC_SEP:
             if doc is None:
                 doc = [line]
@@ -87,9 +91,9 @@ def split_header(lines: Sequence[str]) -> Tuple[str, str]:
                 docs.append("\n".join(doc))
                 doc = None
         elif line == DOC_STOP:
-            if doc is not None:
-                docs.append("\n".join(doc))
-                doc = None
+            assert doc is not None  # noqa: S101
+            docs.append("\n".join(doc))
+            doc = None
             _i += 1
             break
         elif doc is None:
