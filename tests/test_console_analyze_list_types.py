@@ -24,7 +24,7 @@ class FileInfo:
     def create(self) -> None:
         """Create file."""
         with open(self.filename, "w") as f:
-            f.write(inline_note(self.content) + "\n")
+            f.write(inline_note(self.content))
 
 
 Files = List[FileInfo]
@@ -69,7 +69,9 @@ CASES = [
     ParamCase(
         id="TYPE_OUTSIDE_HEADER",
         variables=AnalyzeDetails(
-            files=[FileInfo(inline_note("---\n---\ntype: foo"))],
+            files=[
+                FileInfo(inline_note("---\n---\ntype: foo", trailing_newline=False))
+            ],
             output="",
         ),
     ),

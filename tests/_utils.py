@@ -10,22 +10,22 @@ from boltons.setutils import IndexedSet  # type: ignore
 log = logging.getLogger(__name__)
 
 
-def inline_note(contents: str) -> str:
+def inline_note(contents: str, trailing_newline: bool = True) -> str:
     """Create a file for testing."""
-    return multiline_trim(contents).strip()
+    contents = multiline_trim(contents).strip()
+    if trailing_newline:
+        return contents + "\n"
+    else:
+        return contents
 
 
-def inline_header(header: str) -> str:
+def inline_header(header: str, trailing_newline: bool = True) -> str:
     """Create a file that is header only."""
-    _contents = multiline_trim(header).strip()
-    log.debug(f"contents: '{_contents}'")
-    return inline_note(
-        f"""
-        ---
-        {multiline_trim(header).strip()}
-        ---
-        """
-    )
+    contents = f"---\n{multiline_trim(header).strip()}\n---"
+    if trailing_newline:
+        return contents + "\n"
+    else:
+        return contents
 
 
 ParamaterizationVars = Mapping[str, Any]

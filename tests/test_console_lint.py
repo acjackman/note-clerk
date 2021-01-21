@@ -39,7 +39,7 @@ LINT_CASES = [
 ]
 
 
-FAKE_CONTENT = inline_note("a fake note")
+FAKE_CONTENT = inline_note("a fake note", trailing_newline=False)
 
 
 @pytest.fixture

@@ -24,7 +24,7 @@ class FileInfo:
     def create(self) -> None:
         """Create file."""
         with open(self.filename, "w") as f:
-            f.write(inline_note(self.content) + "\n")
+            f.write(inline_note(self.content))
 
 
 Files = List[FileInfo]
@@ -97,7 +97,7 @@ CASES = [
             files=[
                 FileInfo(
                     filename="test.txt",
-                    content=inline_note("##tag"),
+                    content=inline_note("##tag", trailing_newline=False),
                 )
             ],
             output="##tag\t'test.txt:1:1'\tBODY",
