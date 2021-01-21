@@ -24,4 +24,4 @@ def test_info(cli_runner: CliRunner) -> None:
     result = cli_runner.invoke(console.cli, "info")
     assert result.exit_code == 0
 
-    assert result.output == f'Configuration Directory: "."\n'
+    assert result.output == 'Configuration Directory: "."\n'

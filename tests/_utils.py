@@ -55,11 +55,11 @@ def _get_from_lists(
     raise_error: bool = False,
 ) -> Any:
     """Return the first instance of key in list of dictionaries."""
-    for l in lists:
+    for params in lists:
         try:
-            return l[key]
+            return params[key]
         except KeyError:
-            log.debug(f"Could not find key {key} in {l}")
+            log.debug(f"Could not find key {key} in {params}")
             pass
 
     if raise_error:
@@ -104,4 +104,8 @@ def paramaterize_cases(
         for values in case_values
     ]
 
-    return ParamaterizationArgs(argnames=argnames, argvalues=argvalues, ids=ids,)
+    return ParamaterizationArgs(
+        argnames=argnames,
+        argvalues=argvalues,
+        ids=ids,
+    )

@@ -13,15 +13,31 @@ log = logging.getLogger(__name__)
 
 
 LINT_CASES = [
-    ParamCase(id="NO_FILENAME", variables=LintDetails(content=None, errors=[],),),
     ParamCase(
-        id="HAS_ID", variables=LintDetails(content="20200101000000.md", errors=[],),
+        id="NO_FILENAME",
+        variables=LintDetails(
+            content=None,
+            errors=[],
+        ),
+    ),
+    ParamCase(
+        id="HAS_ID",
+        variables=LintDetails(
+            content="20200101000000.md",
+            errors=[],
+        ),
     ),
     ParamCase(
         id="NO_ID",
         variables=LintDetails(
             content="test.md",
-            errors=[linting.LintError("filename-id-missing", line=None, column=None,)],
+            errors=[
+                linting.LintError(
+                    "filename-id-missing",
+                    line=None,
+                    column=None,
+                )
+            ],
         ),
     ),
     ParamCase(
@@ -29,7 +45,11 @@ LINT_CASES = [
         variables=LintDetails(
             content="202001010000.md",
             errors=[
-                linting.LintError("filename-id-incomplete", line=None, column=None,)
+                linting.LintError(
+                    "filename-id-incomplete",
+                    line=None,
+                    column=None,
+                )
             ],
         ),
     ),
@@ -46,11 +66,16 @@ LINT_CASES = [
 
 
 @pytest.mark.parametrize(**paramaterize_cases(LINT_CASES))
-def test_lints(content: str, errors: LintErrors,) -> None:
+def test_lints(
+    content: str,
+    errors: LintErrors,
+) -> None:
     """Test lints are identified correctly."""
     lints = list(
         linting.lint_file(
-            file=StringIO(""), filename=content, checks=[checks.CheckFilenameId],
+            file=StringIO(""),
+            filename=content,
+            checks=[checks.CheckFilenameId],
         )
     )
 

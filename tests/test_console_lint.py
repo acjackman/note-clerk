@@ -88,7 +88,7 @@ def test_lint_stdin_dirty(
     print(result.output, end="")
 
     assert result.exit_code == 10
-    assert result.output == f"stdin:1:1 | a-fake-error\n"
+    assert result.output == "stdin:1:1 | a-fake-error\n"
 
 
 def test_lint_file_clean(cli_runner: CliRunner, checks_mock: PropertyMock) -> None:

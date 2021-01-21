@@ -90,7 +90,11 @@ def test_lints(
 ) -> None:
     """Test lints are identified correctly."""
     lints = list(
-        linting.lint_file(file=StringIO(content), filename="stdin", checks=checks,)
+        linting.lint_file(
+            file=StringIO(content),
+            filename="stdin",
+            checks=checks,
+        )
     )
 
     if error and line and column:

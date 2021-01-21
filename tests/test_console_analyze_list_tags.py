@@ -42,7 +42,12 @@ CASES = [
         id="START_OF_FILE_TAG",
         description="tag at the start of file counts",
         variables=AnalyzeDetails(
-            files=[FileInfo(filename="test.txt", content=("#tag at start of line"),)],
+            files=[
+                FileInfo(
+                    filename="test.txt",
+                    content=("#tag at start of line"),
+                )
+            ],
             output="#tag\t'test.txt:1:1'\tBODY",
         ),
     ),
@@ -50,7 +55,12 @@ CASES = [
         id="IN_SENTANCE_TAG",
         description="quoted tags count as tags",
         variables=AnalyzeDetails(
-            files=[FileInfo(filename="test.txt", content=("A #tag in a sentence."),)],
+            files=[
+                FileInfo(
+                    filename="test.txt",
+                    content=("A #tag in a sentence."),
+                )
+            ],
             output="#tag\t'test.txt:1:3'\tBODY",
         ),
     ),
@@ -60,7 +70,8 @@ CASES = [
         variables=AnalyzeDetails(
             files=[
                 FileInfo(
-                    filename="test.txt", content=inline_header("tags: ['#inbox']"),
+                    filename="test.txt",
+                    content=inline_header("tags: ['#inbox']"),
                 )
             ],
             output="#inbox\t'test.txt:2:9'\tHEADER_TAGS",
@@ -72,7 +83,8 @@ CASES = [
         variables=AnalyzeDetails(
             files=[
                 FileInfo(
-                    filename="test.txt", content=inline_header('tags: ["#inbox"]'),
+                    filename="test.txt",
+                    content=inline_header('tags: ["#inbox"]'),
                 )
             ],
             output="#inbox\t'test.txt:2:9'\tHEADER_TAGS",
@@ -82,7 +94,12 @@ CASES = [
         id="DOUBLE_HASH_TAG",
         description="double hash structure notes count",
         variables=AnalyzeDetails(
-            files=[FileInfo(filename="test.txt", content=inline_note("##tag"),)],
+            files=[
+                FileInfo(
+                    filename="test.txt",
+                    content=inline_note("##tag"),
+                )
+            ],
             output="##tag\t'test.txt:1:1'\tBODY",
         ),
     ),
@@ -92,7 +109,8 @@ CASES = [
         variables=AnalyzeDetails(
             files=[
                 FileInfo(
-                    filename="test.txt", content=inline_header("top_level: ##tag"),
+                    filename="test.txt",
+                    content=inline_header("top_level: ##tag"),
                 )
             ],
             output="##tag\t'test.txt:2:12'\tHEADER_TOP_LEVEL",
@@ -103,7 +121,10 @@ CASES = [
         description="double hash structure notes count",
         variables=AnalyzeDetails(
             files=[
-                FileInfo(filename="test.txt", content=inline_header("other: ##tag"),)
+                FileInfo(
+                    filename="test.txt",
+                    content=inline_header("other: ##tag"),
+                )
             ],
             output="##tag\t'test.txt:2:8'\tHEADER",
         ),
@@ -127,28 +148,32 @@ CASES = [
         id="MARKDOWN_HEADER_1",
         description="PR identifier doesn't count",
         variables=AnalyzeDetails(
-            files=[FileInfo(filename="test.txt", content="# Header 1")], output="",
+            files=[FileInfo(filename="test.txt", content="# Header 1")],
+            output="",
         ),
     ),
     ParamCase(
         id="MARKDOWN_HEADER_2",
         description="PR identifier doesn't count",
         variables=AnalyzeDetails(
-            files=[FileInfo(filename="test.txt", content="## Header 2")], output="",
+            files=[FileInfo(filename="test.txt", content="## Header 2")],
+            output="",
         ),
     ),
     ParamCase(
         id="MARKDOWN_HEADER_3",
         description="PR identifier doesn't count",
         variables=AnalyzeDetails(
-            files=[FileInfo(filename="test.txt", content="### Header 3")], output="",
+            files=[FileInfo(filename="test.txt", content="### Header 3")],
+            output="",
         ),
     ),
     ParamCase(
         id="PR_IDENTIFIER",
         description="PR identifier doesn't count",
         variables=AnalyzeDetails(
-            files=[FileInfo(filename="test.txt", content="repo#1")], output="",
+            files=[FileInfo(filename="test.txt", content="repo#1")],
+            output="",
         ),
     ),
 ]
