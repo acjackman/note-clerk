@@ -2,6 +2,7 @@ from functools import wraps
 import io
 import logging
 from pathlib import Path
+import re
 from typing import Any, Callable, Dict, Iterable, Optional, TextIO, Tuple
 
 from boltons.fileutils import atomic_save
@@ -50,6 +51,28 @@ def fix_header(header: str) -> str:
     return f"---\n{output.getvalue().strip()}\n***\n"
 
 
+ID_REGEX = re.compile(r"^([0-9]+)")
+
+
+def fix_filename(filename: Optional[str]) -> Optional[str]:
+    if filename is None:
+        return None
+    path = Path(filename)
+    stem = path.stem
+    match = ID_REGEX.match(stem)
+    log.debug(f"{match=}")
+    if match:
+        note_id = match.groups()[0]
+        if len(note_id) == 14:
+            return filename
+        elif len(note_id) < 14:
+            new_path = path.parent / (
+                stem.replace(note_id, note_id.rjust(14, "0")) + path.suffix
+            )
+            return str(new_path)
+    return filename
+
+
 def fix_text(text: TextIO, filename: Optional[str]) -> Tuple[str, Optional[str]]:
     header, body = utils.split_header([line.strip() for line in text.readlines()])
     try:
@@ -59,7 +82,8 @@ def fix_text(text: TextIO, filename: Optional[str]) -> Tuple[str, Optional[str]]
         raise
     log.debug(f"new_header:\n{new_header}")
     new_note: str = ensure_newline(new_header) + ensure_newline(body.strip())
-    return new_note, filename
+    new_filename = fix_filename(filename)
+    return new_note, new_filename
 
 
 def raised_error(func: Callable) -> Callable:
@@ -87,12 +111,10 @@ def update_text(
     # elif base_path is None:
     #     raise Exception("base_path must not be none if null filename")
     else:
-        log.debug(f"Saving new file to '{n_filename}'")
         with atomic_save(n_filename, overwrite=True) as f:
-            f.write(n_text)
-            log.debug("Wr")
+            f.write(n_text.encode("utf-8"))
 
-        log.debug(f"{filename=}  {n_filename=}")
+        log.debug(f"\n  {filename=}\n{n_filename=}")
         if filename is not None and filename != n_filename:
             log.debug("Deleting file")
             Path(filename).unlink()

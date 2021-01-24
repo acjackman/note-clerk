@@ -1,12 +1,12 @@
 """Note clerk application."""
 from dataclasses import dataclass
 from enum import Enum
-from functools import reduce
+from functools import reduce, wraps
 import json
 import logging
 import re
 import sys
-from typing import Callable, Iterable, Optional, TextIO, Tuple, TypeVar
+from typing import Any, Callable, Iterable, Optional, TextIO, Tuple, TypeVar
 
 import click
 import frontmatter
@@ -28,6 +28,18 @@ STD_IN_INDEPENDENT = "Standard in (`-`) should be used independent of any other 
 either: Callable[[bool, bool], bool] = lambda x, y: x | y
 
 
+def log_errors(func: Callable) -> Callable:
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Callable:
+        try:
+            return func(*args, **kwargs)
+        except Exception as exc:
+            log.error(f"Unhandled Exception: {exc}", exc_info=True)
+            raise
+
+    return wrapper
+
+
 @click.group()
 @click.option("--config-dir", type=click.Path(), envvar="NOTECLERK_CONFIG")
 @click.version_option(version=__version__, prog_name="note-clerk")
@@ -37,6 +49,7 @@ either: Callable[[bool, bool], bool] = lambda x, y: x | y
     type=click.Choice(["WARNING", "INFO", "DEBUG"], case_sensitive=False),
 )
 @click.pass_context
+@log_errors
 def cli(ctx: click.Context, config_dir: str, log_level: str) -> None:
     """Note clerk application."""
     ctx.obj = App(config_dir=config_dir)
@@ -52,6 +65,7 @@ def cli(ctx: click.Context, config_dir: str, log_level: str) -> None:
 
 @cli.command()
 @click.pass_obj
+@log_errors
 def info(app: App) -> None:
     """Show app configuration."""
     click.echo(f'Configuration Directory: "{app.config_dir}"')
@@ -89,6 +103,7 @@ def _apply_to_paths(paths: Tuple[str], action: TextAction) -> Iterable[T]:
 @click.argument("paths", nargs=-1, type=click.Path())
 @click.pass_obj
 @click.pass_context
+@log_errors
 def lint(ctx: click.Context, app: App, paths: Tuple[str]) -> None:
     """Lint all files selected by the given paths."""
     # TODO: checks should come from plugins
@@ -111,6 +126,7 @@ def lint(ctx: click.Context, app: App, paths: Tuple[str]) -> None:
 @click.argument("paths", nargs=-1, type=click.Path())
 @click.pass_obj
 @click.pass_context
+@log_errors
 def fix(ctx: click.Context, app: App, paths: Tuple[str]) -> None:
     error = reduce(either, _apply_to_paths(paths, fixing.update_text), False)
     if error:
