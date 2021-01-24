@@ -3,6 +3,8 @@ from _pytest.config import Config
 from click.testing import CliRunner
 import pytest
 
+from ._utils import file_factory
+
 
 def pytest_configure(config: Config) -> None:
     """Configure pytest dynamically."""

@@ -5,7 +5,7 @@ from click.testing import CliRunner
 import pytest
 
 from note_clerk import console
-from ._utils import inline_note, show_output
+from ._utils import inline_note, show_output, FileFactory
 
 
 log = logging.getLogger(__name__)
@@ -67,12 +67,66 @@ FIXES = [
 
 
 @pytest.mark.parametrize("case", FIXES, ids=lambda c: c.code)
-def test_fixs(cli_runner: CliRunner, case: FixCase) -> None:
+def test_fixes(cli_runner: CliRunner, case: FixCase) -> None:
     result = cli_runner.invoke(
         console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
     )
     show_output(result)
     assert result.output == case.fixed
+
+
+def test_fix_overwrites_files_with_valid_name(
+    cli_runner: CliRunner, file_factory: FileFactory
+) -> None:
+    CONTENT = inline_note(
+        """
+        ---
+        type: note
+        ---
+        # Title
+        """
+    )
+    note = file_factory("00000000000000.md", CONTENT)
+
+    result = cli_runner.invoke(
+        console.cli,
+        ["--log-level=DEBUG", "fix", str(note)],
+    )
+    show_output(result)
+
+    with note.open() as f:
+        fixed = f.read()
+
+    assert fixed == CONTENT
+
+
+def test_fix_moves_files_with_invalid_name(
+    cli_runner: CliRunner, file_factory: FileFactory
+) -> None:
+    CONTENT = inline_note(
+        """
+        ---
+        type: note
+        ---
+        # Title
+        """
+    )
+    note = file_factory("000000000000.md", CONTENT)
+
+    result = cli_runner.invoke(
+        console.cli,
+        ["--log-level=DEBUG", "fix", str(note)],
+    )
+    show_output(result)
+    assert result.exit_code == 0
+
+    assert not note.exists()
+
+    note = file_factory("00000000000000.md", CONTENT)
+    with note.open() as f:
+        fixed = f.read()
+
+    assert fixed == CONTENT
 
 
 UNFIXABLE = [

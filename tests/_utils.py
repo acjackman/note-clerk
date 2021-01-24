@@ -2,10 +2,12 @@
 from dataclasses import dataclass
 from inspect import cleandoc as multiline_trim
 import logging
-from typing import Any, List, Mapping, Optional, Tuple, TypedDict
+from pathlib import Path
+from typing import Any, Callable, List, Mapping, Optional, Tuple, TypedDict
 
 from boltons.setutils import IndexedSet  # type: ignore
 import click.testing
+import pytest
 
 
 log = logging.getLogger(__name__)
@@ -121,3 +123,23 @@ def show_output(result: click.testing.Result) -> None:
     except ValueError:
         pass
     print("#" * 58)
+
+
+FileFactory = Callable[[str, str], Path]
+
+
+@pytest.fixture
+def file_factory(tmpdir) -> Callable:  # noqa: ANN001
+    """Quickly make filies in the temp dir."""
+
+    def factory(filename: str, content: str = "content") -> Path:
+        path = Path(str(tmpdir)) / filename
+
+        if path.exists():
+            return path
+
+        with open(path, "w") as f:
+            f.write(content)
+        return path
+
+    return factory

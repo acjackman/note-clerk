@@ -1,26 +1,11 @@
 """Test the utils."""
 from pathlib import Path
 import textwrap
-from typing import Callable
 
 import pytest
 
 from note_clerk import utils
 from ._utils import inline_note
-
-
-@pytest.fixture
-def file_factory(tmpdir) -> Callable:  # noqa: ANN001
-    """Quickly make filies in the temp dir."""
-
-    def factory(filename: str, content: str = "content") -> Path:
-        path = Path(str(tmpdir)) / filename
-        with open(path, "w") as f:
-            f.write(content)
-
-        return path
-
-    return factory
 
 
 class TestAllFiles:

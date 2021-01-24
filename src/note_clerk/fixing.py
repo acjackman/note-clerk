@@ -87,7 +87,12 @@ def update_text(
     # elif base_path is None:
     #     raise Exception("base_path must not be none if null filename")
     else:
+        log.debug(f"Saving new file to '{n_filename}'")
         with atomic_save(n_filename, overwrite=True) as f:
             f.write(n_text)
+            log.debug("Wr")
+
+        log.debug(f"{filename=}  {n_filename=}")
         if filename is not None and filename != n_filename:
+            log.debug("Deleting file")
             Path(filename).unlink()
