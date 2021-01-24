@@ -28,6 +28,19 @@ class FixCase:
 
 FIXES = [
     FixCase(
+        name="Change YAML Header",
+        original="""
+        ---
+        ---
+        # Test Note
+        """,
+        fixed="""
+        ---
+        ---
+        # Test Note
+        """,
+    ),
+    FixCase(
         name="Collapses Headers",
         original="""
         ---
@@ -70,6 +83,17 @@ UNFIXABLE = [
         created: 2020-11-15T05:42:49.301Z
         created: 2020-11-15T05:42:49.301Z
         tags: ["#inbox"]
+        # Test Note
+        """
+    ),
+    inline_note(
+        """
+        ---
+        k1: 1
+        ---
+        ---
+        k1: 2
+        ---
         # Test Note
         """
     ),

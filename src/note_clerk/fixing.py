@@ -55,7 +55,8 @@ def fix_text(text: TextIO, filename: Optional[str]) -> Tuple[str, Optional[str]]
     try:
         new_header = fix_header(header)
     except Exception:
-        log.error("error creationg header", exc_info=True)
+        log.error("error creating header", exc_info=True)
+        raise
     log.debug(f"new_header:\n{new_header}")
     new_note: str = ensure_newline(new_header) + ensure_newline(body.strip())
     return new_note, filename
