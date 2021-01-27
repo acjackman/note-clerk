@@ -1,15 +1,17 @@
+import datetime as dt
 from functools import wraps
 import io
 import logging
 from pathlib import Path
 import re
-from typing import Any, Callable, Dict, Iterable, Optional, TextIO, Tuple
+from typing import Any, Callable, Dict, Iterable, Optional, TextIO, Tuple, Union
 
 from boltons.fileutils import atomic_save
 import click
+from dateutil.parser import parse as parse_date
 from orderedset import OrderedSet
 from ruamel.yaml import YAML
-
+from ruamel.yaml.timestamp import TimeStamp
 
 from . import utils
 from .utils import ensure_newline
@@ -20,6 +22,40 @@ log = logging.getLogger(__name__)
 
 class UnableFix(Exception):
     """Unable to fix this particular file."""
+
+
+DateLike = Union[TimeStamp, dt.datetime, str]
+
+
+def as_date(value: DateLike) -> dt.datetime:
+    if isinstance(value, str):
+        return parse_date(value)
+    return value
+
+
+def min_date(existing: DateLike, new: DateLike) -> DateLike:
+    existing_date = as_date(existing)
+    new_date = as_date(new)
+    if existing_date <= new_date:
+        return existing
+    else:
+        return new
+
+
+def merge_values(key: str, existing: Any, new: Any) -> Any:
+    if isinstance(existing, list) and isinstance(new, list):
+        return list(OrderedSet(existing + new))
+    elif existing == new:
+        return existing
+    elif key == "created":
+        try:
+            log.debug(f"{type(existing)=} {type(new)=}")
+            return min_date(existing, new)
+        except (TypeError, ValueError):
+            pass
+    elif isinstance(existing, int) or isinstance(new, int):
+        raise UnableFix("Unable to join integers")
+    raise UnableFix("Unable to join constants")
 
 
 def fix_header(header: str) -> str:
@@ -36,13 +72,7 @@ def fix_header(header: str) -> str:
         log.debug(f"doc:\n{doc}")
         for key, value in sorted(doc.items(), key=lambda t: t[0]):
             try:
-                existing = combined[key]
-                if isinstance(existing, list) and isinstance(value, list):
-                    combined[key] = list(OrderedSet(existing + value))
-                elif existing == value:
-                    pass
-                else:
-                    raise UnableFix("Unable to join constants")
+                combined[key] = merge_values(key, combined[key], value)
             except KeyError:
                 combined[key] = value
 

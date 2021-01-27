@@ -70,6 +70,24 @@ FIXES = [
         """,
     ),
     FixCase(
+        name="Collapses date headers by minimizing",
+        original="""
+        ---
+        created: 2020-11-15T06:00:00Z
+        ---
+        ---
+        created: 2020-11-15T05:42:49.301Z
+        ---
+        # Test Note
+        """,
+        fixed="""
+        ---
+        created: 2020-11-15T05:42:49.301000Z
+        ***
+        # Test Note
+        """,
+    ),
+    FixCase(
         name="ID name doesn't change",
         original="""
         ---
@@ -111,55 +129,54 @@ FIXES = [
         filename="123456789012345.md",
     ),
 ]
-STDIN_FIXES = [f for f in FIXES if f.filename == "-"]
-FILE_FIXES = [f for f in FIXES if f.filename != "-"]
 
 
-@pytest.mark.parametrize("case", STDIN_FIXES, ids=lambda c: c.code)
-def test_fixes(cli_runner: CliRunner, case: FixCase) -> None:
-    result = cli_runner.invoke(
-        console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
-    )
-    show_output(result)
-    assert result.output == case.fixed
-
-
-@pytest.mark.parametrize("case", FILE_FIXES, ids=lambda c: c.code)
-def test_fix_files(
+@pytest.mark.parametrize("case", FIXES, ids=lambda c: c.code)
+def test_fixes(
     cli_runner: CliRunner,
     file_factory: FileFactory,
     case: FixCase,
 ) -> None:
+    if case.name == "-":
+        result = cli_runner.invoke(
+            console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
+        )
+        show_output(result)
+        assert result.exit_code == 0
+        assert result.output == case.fixed
+    else:
+        note = file_factory(case.filename, case.original)
+        result = cli_runner.invoke(
+            console.cli,
+            ["--log-level=DEBUG", "fix", str(note)],
+        )
+        show_output(result)
+        assert result.exit_code == 0
 
-    note = file_factory(case.filename, case.original)
-    result = cli_runner.invoke(
-        console.cli,
-        ["--log-level=DEBUG", "fix", str(note)],
-    )
-    show_output(result)
+        fixed_note = file_factory(case.newname, path_only=True)
+        with fixed_note.open() as f:
+            fixed = f.read()
 
-    fixed_note = file_factory(case.newname, path_only=True)
-    with fixed_note.open() as f:
-        fixed = f.read()
-
-    assert fixed == case.fixed
-    if case.filename != case.newname:
-        not note.exists()
+        assert fixed == case.fixed
+        if case.filename != case.newname:
+            not note.exists()
 
 
 UNFIXABLE = [
-    inline_note(
-        """
+    FixCase(
+        name="unclosed header",
+        original="""
         ---
         tags: ["#tag2"]
         created: 2020-11-15T05:42:49.301Z
         created: 2020-11-15T05:42:49.301Z
         tags: ["#inbox"]
         # Test Note
-        """
+        """,
     ),
-    inline_note(
-        """
+    FixCase(
+        name="duplicate keys integer values ",
+        original="""
         ---
         k1: 1
         ---
@@ -167,18 +184,15 @@ UNFIXABLE = [
         k1: 2
         ---
         # Test Note
-        """
+        """,
     ),
 ]
 
 
-@pytest.mark.parametrize("text", UNFIXABLE)
-def test_unfixible(cli_runner: CliRunner, text: str) -> None:
-
+@pytest.mark.parametrize("case", UNFIXABLE, ids=lambda c: c.code)
+def test_unfixible(cli_runner: CliRunner, case: FixCase) -> None:
     result = cli_runner.invoke(
-        console.cli, ["--log-level=DEBUG", "fix", "-"], input=text
+        console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
     )
-
-    print(result.output)
-
+    show_output(result)
     assert result.exit_code != 0

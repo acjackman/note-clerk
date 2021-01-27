@@ -561,6 +561,17 @@ pytest = ">=2.7"
 dev = ["pre-commit", "tox"]
 
 [[package]]
+name = "python-dateutil"
+version = "2.8.1"
+description = "Extensions to the standard Python datetime module"
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
+
+[package.dependencies]
+six = ">=1.5"
+
+[[package]]
 name = "python-frontmatter"
 version = "0.5.0"
 description = "Parse and manage posts with YAML (or other) frontmatter"
@@ -891,7 +902,7 @@ tests = ["pytest", "pytest-cov", "codecov"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "1c3bb5bb191d28461c5484f5516930290963f2ce64f88119ae698a8dc5db580f"
+content-hash = "2183e2853ca4d2eb6423613553393c4ac0f4c280aec562778db0c8fb58ff7296"
 
 [metadata.files]
 alabaster = [
@@ -1184,6 +1195,10 @@ pytest-cov = [
 pytest-mock = [
     {file = "pytest-mock-2.0.0.tar.gz", hash = "sha256:b35eb281e93aafed138db25c8772b95d3756108b601947f89af503f8c629413f"},
     {file = "pytest_mock-2.0.0-py2.py3-none-any.whl", hash = "sha256:cb67402d87d5f53c579263d37971a164743dc33c159dfb4fb4a86f37c5552307"},
+]
+python-dateutil = [
+    {file = "python-dateutil-2.8.1.tar.gz", hash = "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c"},
+    {file = "python_dateutil-2.8.1-py2.py3-none-any.whl", hash = "sha256:75bb3f31ea686f1197762692a9ee6a7550b59fc6ca3a1f4b5d7e32fb98e2da2a"},
 ]
 python-frontmatter = [
     {file = "python-frontmatter-0.5.0.tar.gz", hash = "sha256:a9c2e90fc38e9f0c68d8b82299040f331ca3b8525ac7fa5f6beffef52b26c426"},
