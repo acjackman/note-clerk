@@ -3,7 +3,8 @@ from dataclasses import dataclass
 from inspect import cleandoc as multiline_trim
 import logging
 from pathlib import Path
-from typing import Any, Callable, List, Mapping, Optional, Tuple, TypedDict
+from typing import Any, Callable, List, Mapping, Optional, Protocol, Tuple, TypedDict
+
 
 from boltons.setutils import IndexedSet  # type: ignore
 import click.testing
@@ -125,17 +126,25 @@ def show_output(result: click.testing.Result) -> None:
     print("#" * 58)
 
 
-FileFactory = Callable[[str, str], Path]
+class FileFactory(Protocol):
+    def __call__(
+        self, filename: str, content: str = "content", path_only: bool = False
+    ) -> Path:
+        ...
 
 
 @pytest.fixture
 def file_factory(tmpdir) -> Callable:  # noqa: ANN001
     """Quickly make filies in the temp dir."""
 
-    def factory(filename: str, content: str = "content") -> Path:
+    def factory(
+        filename: str,
+        content: str = "content",
+        path_only: bool = False,
+    ) -> Path:
         path = Path(str(tmpdir)) / filename
 
-        if path.exists():
+        if path_only:
             return path
 
         with open(path, "w") as f:

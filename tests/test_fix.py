@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import logging
-from typing import Optional
 
 from click.testing import CliRunner
 import pytest
@@ -12,20 +11,20 @@ from ._utils import FileFactory, inline_note, show_output
 log = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass()
 class FixCase:
     name: str
     original: str
-    fixed: Optional[str] = None
+    fixed: str = ""
     filename: str = "-"
-    newname: Optional[str] = None
+    newname: str = ""
 
     def __post_init__(self) -> None:
         self.original = inline_note(self.original, trailing_newline=True)
-        if self.fixed is None:
+        if self.fixed == "":
             self.fixed = self.original
         self.fixed = inline_note(self.fixed, trailing_newline=True)
-        if self.newname is None:
+        if self.newname == "":
             self.newname = self.filename
 
     @property
@@ -70,19 +69,6 @@ FIXES = [
         # Test Note
         """,
     ),
-]
-
-
-@pytest.mark.parametrize("case", FIXES, ids=lambda c: c.code)
-def test_fixes(cli_runner: CliRunner, case: FixCase) -> None:
-    result = cli_runner.invoke(
-        console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
-    )
-    show_output(result)
-    assert result.output == case.fixed
-
-
-TEST_FIX_FILES = [
     FixCase(
         name="ID name doesn't change",
         original="""
@@ -103,15 +89,48 @@ TEST_FIX_FILES = [
         """,
         filename="testing.txt",
     ),
+    FixCase(
+        name="maxes out id length",
+        original="""
+        ---
+        type: note
+        ---
+        # Title
+        """,
+        filename="1234.md",
+        newname="12340000000000.md",
+    ),
+    FixCase(
+        name="overlong ids are not changed",
+        original="""
+        ---
+        type: note
+        ---
+        # Title
+        """,
+        filename="123456789012345.md",
+    ),
 ]
+STDIN_FIXES = [f for f in FIXES if f.filename == "-"]
+FILE_FIXES = [f for f in FIXES if f.filename != "-"]
 
 
-@pytest.mark.parametrize("case", TEST_FIX_FILES, ids=lambda c: c.code)
-def test_fix_overwrites_files_with_valid_name(
+@pytest.mark.parametrize("case", STDIN_FIXES, ids=lambda c: c.code)
+def test_fixes(cli_runner: CliRunner, case: FixCase) -> None:
+    result = cli_runner.invoke(
+        console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
+    )
+    show_output(result)
+    assert result.output == case.fixed
+
+
+@pytest.mark.parametrize("case", FILE_FIXES, ids=lambda c: c.code)
+def test_fix_files(
     cli_runner: CliRunner,
     file_factory: FileFactory,
     case: FixCase,
 ) -> None:
+
     note = file_factory(case.filename, case.original)
     result = cli_runner.invoke(
         console.cli,
@@ -119,37 +138,13 @@ def test_fix_overwrites_files_with_valid_name(
     )
     show_output(result)
 
-    with note.open() as f:
-        fixed = f.read()
-    assert fixed == case.original
-
-
-def test_fix_moves_files_with_invalid_name(
-    cli_runner: CliRunner, file_factory: FileFactory
-) -> None:
-    CONTENT = inline_note(
-        """
-        ---
-        type: note
-        ---
-        # Title
-        """
-    )
-    note = file_factory("1234.md", CONTENT)
-
-    result = cli_runner.invoke(
-        console.cli,
-        ["--log-level=DEBUG", "fix", str(note)],
-    )
-    show_output(result)
-    assert result.exit_code == 0
-    assert not note.exists()
-
-    note = file_factory("00000000000000.md", CONTENT)
-    with note.open() as f:
+    fixed_note = file_factory(case.newname, path_only=True)
+    with fixed_note.open() as f:
         fixed = f.read()
 
-    assert fixed == CONTENT
+    assert fixed == case.fixed
+    if case.filename != case.newname:
+        not note.exists()
 
 
 UNFIXABLE = [

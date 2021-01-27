@@ -66,9 +66,8 @@ def fix_filename(filename: Optional[str]) -> Optional[str]:
         if len(note_id) == 14:
             return filename
         elif len(note_id) < 14:
-            new_path = path.parent / (
-                stem.replace(note_id, note_id.rjust(14, "0")) + path.suffix
-            )
+            new_filename = stem.replace(note_id, note_id.ljust(14, "0")) + path.suffix
+            new_path = path.parent / new_filename
             return str(new_path)
     return filename
 
