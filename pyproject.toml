@@ -1,13 +1,20 @@
 [tool.poetry]
 name = "note-clerk"
-version = "0.0.11"
+version = "0.0.10"
 authors = ["Adam Jackman <adam@acjackman.com>"]
-description = "Command to manage plain text notes."
+description = "Utility to manage plain text notes."
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/<your-username>/hypermodern-python"
-repository = "https://github.com/<your-username>/hypermodern-python"
+homepage = "https://github.com/acjackman/note-clerk"
+repository = "https://github.com/acjackman/note-clerk"
 documentation = "https://note-clerk.readthedocs.io"
+packages = [
+    { include = "note_clerk", from = "src" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
