@@ -25,7 +25,8 @@ unicode_log = logging.getLogger(f"{__name__}.unicode_file")
 STD_IN_INDEPENDENT = "Standard in (`-`) should be used independent of any other file"
 
 
-either: Callable[[bool, bool], bool] = lambda x, y: x | y
+def either(x: bool, y: bool) -> bool:
+    return x | y
 
 
 def log_errors(func: Callable) -> Callable:
@@ -50,7 +51,7 @@ def log_errors(func: Callable) -> Callable:
 )
 @click.pass_context
 @log_errors
-def cli(ctx: click.Context, config_dir: str, log_level: str) -> None:
+def cli(ctx: click.Context, config_dir: Optional[str], log_level: str) -> None:
     """Note clerk application."""
     ctx.obj = App(config_dir=config_dir)
     logging.basicConfig(
@@ -75,7 +76,7 @@ T = TypeVar("T")
 TextAction = Callable[[TextIO, Optional[str]], T]
 
 
-def _apply_to_paths(paths: Tuple[str], action: TextAction) -> Iterable[T]:
+def _apply_to_paths(paths: Iterable[str], action: TextAction) -> Iterable[T]:
     log.debug(f"{paths=}")
     _paths = list(paths)
 
@@ -104,7 +105,7 @@ def _apply_to_paths(paths: Tuple[str], action: TextAction) -> Iterable[T]:
 @click.pass_obj
 @click.pass_context
 @log_errors
-def lint(ctx: click.Context, app: App, paths: Tuple[str]) -> None:
+def lint(ctx: click.Context, app: App, paths: Iterable[str]) -> None:
     """Lint all files selected by the given paths."""
     # TODO: checks should come from plugins
     lint_checks = app.lint_checks
@@ -127,7 +128,7 @@ def lint(ctx: click.Context, app: App, paths: Tuple[str]) -> None:
 @click.pass_obj
 @click.pass_context
 @log_errors
-def fix(ctx: click.Context, app: App, paths: Tuple[str]) -> None:
+def fix(ctx: click.Context, app: App, paths: Iterable[str]) -> None:
     error = reduce(either, _apply_to_paths(paths, fixing.update_text), False)
     if error:
         ctx.exit(10)
@@ -162,7 +163,7 @@ class FileTag:
 @analyze.command()
 @click.argument("paths", nargs=-1, type=click.Path())
 @click.pass_obj
-def list_tags(app: App, paths: Tuple[str]) -> None:
+def list_tags(app: App, paths: Iterable[str]) -> None:
     """List all tags in given notes."""
     TAG = r"#(#+)?[^\s\"'`\.,!#\]|)}/\\]+"
     TAG_FINDER = re.compile(r"(^" + TAG + r"|(?<=[\s\"'])" + TAG + r")")
@@ -228,7 +229,7 @@ class FileValue:
 @analyze.command()
 @click.argument("paths", nargs=-1, type=click.Path())
 @click.pass_obj
-def list_types(app: App, paths: Tuple[str]) -> None:
+def list_types(app: App, paths: Iterable[str]) -> None:
     """List all types in given notes."""
 
     def _list_types(text: TextIO, filename: Optional[str]) -> Iterable[FileValue]:

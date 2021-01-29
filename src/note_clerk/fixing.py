@@ -1,5 +1,4 @@
 import datetime as dt
-from functools import wraps
 import io
 import logging
 from pathlib import Path
@@ -116,7 +115,6 @@ def fix_text(text: TextIO, filename: Optional[str]) -> Tuple[str, Optional[str]]
 
 
 def raised_error(func: Callable) -> Callable:
-    @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Iterable[bool]:
         try:
             func(*args, **kwargs)

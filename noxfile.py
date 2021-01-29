@@ -11,6 +11,7 @@ from nox.sessions import Session
 
 package = "note_clerk"
 python_versions = ["3.9", "3.8"]
+max_version = python_versions[0]
 nox.options.sessions = (
     "pre-commit",
     "safety",
@@ -73,7 +74,7 @@ def activate_virtualenv_in_precommit_hooks(session: Session) -> None:
         hook.write_text("\n".join(lines))
 
 
-@nox.session(name="pre-commit", python="3.9")
+@nox.session(name="pre-commit", python=max_version)
 def precommit(session: Session) -> None:
     """Lint using pre-commit."""
     args = session.posargs or ["run", "--all-files", "--show-diff-on-failure"]
@@ -95,7 +96,7 @@ def precommit(session: Session) -> None:
         activate_virtualenv_in_precommit_hooks(session)
 
 
-@nox.session(python="3.9")
+@nox.session(python=max_version)
 def safety(session: Session) -> None:
     """Scan dependencies for insecure packages."""
     requirements = nox_poetry.export_requirements(session)
@@ -108,7 +109,7 @@ def mypy(session: Session) -> None:
     """Type-check using mypy."""
     args = session.posargs or ["src", "tests", "docs/conf.py"]
     session.install(".")
-    session.install("mypy", "pytest")
+    session.install("mypy", "pytest", "pytest_mock")
     session.run("mypy", *args)
     if not session.posargs:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
@@ -118,7 +119,7 @@ def mypy(session: Session) -> None:
 def tests(session: Session) -> None:
     """Run the test suite."""
     session.install(".")
-    session.install("coverage[toml]", "pytest", "pygments", "pytest_mock")
+    session.install("coverage[toml]", "pytest", "pygments", "pytest-mock")
     try:
         session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
     finally:
@@ -145,7 +146,7 @@ def coverage(session: Session) -> None:
 def typeguard(session: Session) -> None:
     """Runtime type checking using Typeguard."""
     session.install(".")
-    session.install("pytest", "typeguard", "pygments")
+    session.install("pytest", "typeguard", "pygments", "pytest-mock")
     session.run("pytest", f"--typeguard-packages={package}", *session.posargs)
 
 
@@ -158,12 +159,20 @@ def xdoctest(session: Session) -> None:
     session.run("python", "-m", "xdoctest", package, *args)
 
 
+DOC_REQUIREMENTS = [
+    "sphinx",
+    "sphinx-click",
+    "sphinx-rtd-theme",
+    "sphinx-autodoc-typehints",
+]
+
+
 @nox.session(name="docs-build", python="3.8")
 def docs_build(session: Session) -> None:
     """Build the documentation."""
     args = session.posargs or ["docs", "docs/_build"]
     session.install(".")
-    session.install("sphinx", "sphinx-click", "sphinx-rtd-theme")
+    session.install(*DOC_REQUIREMENTS)
 
     build_dir = Path("docs", "_build")
     if build_dir.exists():
@@ -172,12 +181,19 @@ def docs_build(session: Session) -> None:
     session.run("sphinx-build", *args)
 
 
-@nox.session(python="3.8")
+@nox.session(python=max_version)
 def docs(session: Session) -> None:
     """Build and serve the documentation with live reloading on file changes."""
     args = session.posargs or ["--open-browser", "docs", "docs/_build"]
     session.install(".")
-    session.install("sphinx", "sphinx-autobuild", "sphinx-click", "sphinx-rtd-theme")
+    session.install(
+        *(
+            DOC_REQUIREMENTS
+            + [
+                "sphinx-autobuild",
+            ]
+        )
+    )
 
     build_dir = Path("docs", "_build")
     if build_dir.exists():
