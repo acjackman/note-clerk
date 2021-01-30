@@ -277,9 +277,7 @@ def test_fix_filename_dosnt_overwrite(
 ) -> None:
     note = file_factory(filename, content="note_1")
     log.debug(f"{note=}")
-    overlaps = [
-        file_factory(name, content=f"note_{i}") for i, name in enumerate(overlap_names)
-    ]
+    [file_factory(name, content=f"note_{i}") for i, name in enumerate(overlap_names)]
     correct = file_factory(expected, path_only=True)
     assert fixing.fix_filename(str(note)) == str(correct)
     # for i, overlap in enumerate(overlaps):

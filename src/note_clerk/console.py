@@ -6,7 +6,7 @@ import json
 import logging
 import re
 import sys
-from typing import Any, Callable, Iterable, Optional, TextIO, Tuple, TypeVar
+from typing import Any, Callable, Iterable, Optional, TextIO, TypeVar
 
 import click
 import frontmatter
