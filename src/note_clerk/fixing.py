@@ -6,7 +6,6 @@ import re
 from typing import Any, Callable, Dict, Iterable, Optional, TextIO, Tuple, Union
 
 from boltons.fileutils import atomic_save
-import click
 from dateutil.parser import parse as parse_date
 from orderedset import OrderedSet
 from ruamel.yaml import YAML
