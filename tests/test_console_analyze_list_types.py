@@ -24,7 +24,7 @@ class FileInfo:
     def create(self) -> None:
         """Create file."""
         with open(self.filename, "w") as f:
-            f.write(inline_note(self.content) + "\n")
+            f.write(inline_note(self.content))
 
 
 Files = List[FileInfo]
@@ -41,7 +41,8 @@ CASES = [
     ParamCase(
         id="SIMPLE_TYPE",
         variables=AnalyzeDetails(
-            files=[FileInfo(inline_header("type: foo"))], output="foo\t'test.txt'",
+            files=[FileInfo(inline_header("type: foo"))],
+            output="foo\t'test.txt'",
         ),
     ),
     ParamCase(
@@ -61,13 +62,17 @@ CASES = [
     ParamCase(
         id="UPPER_CASE_TYPE_KEY",
         variables=AnalyzeDetails(
-            files=[FileInfo(inline_header("Type: foo"))], output="",
+            files=[FileInfo(inline_header("Type: foo"))],
+            output="",
         ),
     ),
     ParamCase(
         id="TYPE_OUTSIDE_HEADER",
         variables=AnalyzeDetails(
-            files=[FileInfo(inline_note("---\n---\ntype: foo"))], output="",
+            files=[
+                FileInfo(inline_note("---\n---\ntype: foo", trailing_newline=False))
+            ],
+            output="",
         ),
     ),
 ]
@@ -113,7 +118,11 @@ FILE_VALUE_CASES = [
     ParamCase(
         "LINE_NUM",
         variables=FVDetails(
-            fv=console.FileValue("foo", filepath="test.txt", line=5,),
+            fv=console.FileValue(
+                "foo",
+                filepath="test.txt",
+                line=5,
+            ),
             file_location="test.txt:5",
         ),
     ),
@@ -139,7 +148,12 @@ FILE_VALUE_CASES = [
     ParamCase(
         "LOCATION_WITHOUT_FILE",
         variables=FVDetails(
-            fv=console.FileValue("foo", filepath=None, line=5, column=4,),
+            fv=console.FileValue(
+                "foo",
+                filepath=None,
+                line=5,
+                column=4,
+            ),
             file_location=":5:4",
         ),
     ),

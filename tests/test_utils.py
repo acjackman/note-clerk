@@ -1,24 +1,11 @@
 """Test the utils."""
 from pathlib import Path
-from typing import Callable
+import textwrap
 
 import pytest
 
 from note_clerk import utils
-
-
-@pytest.fixture
-def file_factory(tmpdir) -> Callable:  # noqa: ANN001
-    """Quickly make filies in the temp dir."""
-
-    def factory(filename: str, content: str = "content") -> Path:
-        path = Path(str(tmpdir)) / filename
-        with open(path, "w") as f:
-            f.write(content)
-
-        return path
-
-    return factory
+from ._utils import inline_note
 
 
 class TestAllFiles:
@@ -61,3 +48,145 @@ class TestAllFiles:
         full_list = list(utils._all_files((tmp,)))
 
         assert set(full_list) == set([f, f2])
+
+
+HEADERS = [
+    (
+        inline_note(
+            """
+            # Note
+            """
+        ),
+        0,
+    ),
+    (
+        inline_note(
+            """
+            # Note with line
+            ---
+            has content
+            """
+        ),
+        0,
+    ),
+    (
+        inline_note(
+            """
+            ***
+            # Note
+            """
+        ),
+        0,
+    ),
+    (
+        inline_note(
+            """
+            ---
+            ---
+            # Note
+            """
+        ),
+        2,
+    ),
+    (
+        inline_note(
+            """
+            ---
+            thing1: true
+            ---
+            # Note
+            """
+        ),
+        3,
+    ),
+    (
+        inline_note(
+            """
+            ---
+            thing1: true
+            ---
+            ---
+            ---
+            # Note
+            """
+        ),
+        5,
+    ),
+    (
+        inline_note(
+            """
+            ---
+            thing1: true
+            ---
+            ---
+            thing2: true
+            ---
+            # Note
+            """
+        ),
+        6,
+    ),
+    (
+        inline_note(
+            """
+            ---
+            thing1: true
+            ---
+            ---
+            ---
+            # Note with divider
+            ---
+            """
+        ),
+        5,
+    ),
+    (
+        inline_note(
+            """
+            ---
+            thing1: true
+            ***
+            ---
+            ---
+            """
+        ),
+        3,
+    ),
+    (
+        inline_note(
+            """
+            ---
+            ***
+            ***
+            """
+        ),
+        2,
+    ),
+]
+
+
+def print_text(label: str, value: str) -> None:
+    print(f"{label}:\n{textwrap.indent(value, ' ' * 4)}")
+
+
+@pytest.mark.parametrize("text,header_lines", HEADERS)
+def test_extract_header(text: str, header_lines: int) -> None:
+    lines = text.split("\n")
+    correct_header = "\n".join(lines[:header_lines])
+    correct_body = "\n".join(lines[header_lines:])
+
+    print_text("Correct Header", correct_header)
+    print_text("Correct Body", correct_body)
+
+    header, body = utils.split_header(lines)
+
+    print_text("Header", header)
+    print_text("Body", body)
+
+    assert header == correct_header
+    assert body == correct_body
+
+
+def test_ensure_newline() -> None:
+    assert utils.ensure_newline("") == "\n"
+    assert utils.ensure_newline("\n") == "\n"

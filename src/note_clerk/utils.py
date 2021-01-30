@@ -1,9 +1,12 @@
 """Utility Functions for NoteClerk."""
 
+import logging
 from pathlib import Path
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, List, Sequence, Tuple
 
 from boltons import iterutils
+
+logger = logging.getLogger(__name__)
 
 
 class FilesNotFound(Exception):
@@ -58,3 +61,45 @@ def quoted_paths(paths: Iterable[Path]) -> str:
 
     """
     return " ".join([f'"{p}"' for p in paths])
+
+
+def ensure_newline(text: str) -> str:
+    if text.endswith("\n"):
+        return text
+    return text + "\n"
+
+
+DOC_SEP = "---"
+DOC_STOP = "***"
+
+
+def split_header(lines: Sequence[str]) -> Tuple[str, str]:
+    """Extract header from document."""
+    if lines[0] != DOC_SEP:
+        return "", "\n".join(lines)
+
+    docs: List[str] = []
+    doc = None
+    for _i, line in enumerate(lines):
+        if doc:
+            doc.append(line)
+
+        if line == DOC_SEP:
+            if doc is None:
+                doc = [line]
+            else:
+                docs.append("\n".join(doc))
+                doc = None
+        elif line == DOC_STOP:
+            assert doc is not None  # noqa: S101
+            docs.append("\n".join(doc))
+            doc = None
+            _i += 1
+            break
+        elif doc is None:
+            break
+
+    if doc is not None:
+        raise Exception("Unclosed header")
+
+    return "\n".join(docs), "\n".join(lines[_i:])

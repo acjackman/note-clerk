@@ -19,20 +19,30 @@ LINT_CASES = [
         variables=LintDetails(
             content=inline_header("type: /foo"),
             errors=[
-                linting.LintError(line=2, column=7, error="header-type-leading-slash",)
+                linting.LintError(
+                    line=2,
+                    column=7,
+                    error="header-type-leading-slash",
+                )
             ],
         ),
     ),
     ParamCase(
         id="HEAD_TYPE_LEADING_SLASH_PASS",
         description="type without leading slash should not lint",
-        variables=LintDetails(content=inline_header("type: foo"), errors=[],),
+        variables=LintDetails(
+            content=inline_header("type: foo"),
+            errors=[],
+        ),
     ),
 ]
 
 
 @pytest.mark.parametrize(**paramaterize_cases(LINT_CASES))
-def test_check_header_type_leading_slash(content: str, errors: LintErrors,) -> None:
+def test_check_header_type_leading_slash(
+    content: str,
+    errors: LintErrors,
+) -> None:
     """Test lints are identified correctly."""
     lints = set(
         linting.lint_file(

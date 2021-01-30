@@ -2,30 +2,34 @@
 from dataclasses import dataclass
 from inspect import cleandoc as multiline_trim
 import logging
-from typing import Any, List, Mapping, Optional, Tuple, TypedDict
+from pathlib import Path
+from typing import Any, Callable, List, Mapping, Optional, Protocol, Tuple, TypedDict
+
 
 from boltons.setutils import IndexedSet  # type: ignore
+import click.testing
+import pytest
 
 
 log = logging.getLogger(__name__)
 
 
-def inline_note(contents: str) -> str:
+def inline_note(contents: str, trailing_newline: bool = True) -> str:
     """Create a file for testing."""
-    return multiline_trim(contents).strip()
+    contents = multiline_trim(contents).strip()
+    if trailing_newline:
+        return contents + "\n"
+    else:
+        return contents
 
 
-def inline_header(header: str) -> str:
+def inline_header(header: str, trailing_newline: bool = True) -> str:
     """Create a file that is header only."""
-    _contents = multiline_trim(header).strip()
-    log.debug(f"contents: '{_contents}'")
-    return inline_note(
-        f"""
-        ---
-        {multiline_trim(header).strip()}
-        ---
-        """
-    )
+    contents = f"---\n{multiline_trim(header).strip()}\n---"
+    if trailing_newline:
+        return contents + "\n"
+    else:
+        return contents
 
 
 ParamaterizationVars = Mapping[str, Any]
@@ -55,11 +59,11 @@ def _get_from_lists(
     raise_error: bool = False,
 ) -> Any:
     """Return the first instance of key in list of dictionaries."""
-    for l in lists:
+    for params in lists:
         try:
-            return l[key]
+            return params[key]
         except KeyError:
-            log.debug(f"Could not find key {key} in {l}")
+            log.debug(f"Could not find key {key} in {params}")
             pass
 
     if raise_error:
@@ -104,4 +108,47 @@ def paramaterize_cases(
         for values in case_values
     ]
 
-    return ParamaterizationArgs(argnames=argnames, argvalues=argvalues, ids=ids,)
+    return ParamaterizationArgs(
+        argnames=argnames,
+        argvalues=argvalues,
+        ids=ids,
+    )
+
+
+def show_output(result: click.testing.Result) -> None:
+    print("# stdout" + "#" * 50)
+    print(result.stdout)
+    print("# stderr" + "#" * 50)
+    try:
+        print(result.stderr)
+    except ValueError:
+        pass
+    print("#" * 58)
+
+
+class FileFactory(Protocol):
+    def __call__(
+        self, filename: str, content: str = "content", path_only: bool = False
+    ) -> Path:
+        ...
+
+
+@pytest.fixture
+def file_factory(tmpdir) -> Callable:  # noqa: ANN001
+    """Quickly make filies in the temp dir."""
+
+    def factory(
+        filename: str,
+        content: str = "content",
+        path_only: bool = False,
+    ) -> Path:
+        path = Path(str(tmpdir)) / filename
+
+        if path_only:
+            return path
+
+        with open(path, "w") as f:
+            f.write(content)
+        return path
+
+    return factory

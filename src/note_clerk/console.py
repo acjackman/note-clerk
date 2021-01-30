@@ -1,18 +1,19 @@
 """Note clerk application."""
 from dataclasses import dataclass
 from enum import Enum
-from functools import reduce
+from functools import reduce, wraps
 import json
 import logging
 import re
 import sys
-from typing import Callable, Iterable, Optional, TextIO, Tuple, TypeVar
+from typing import Any, Callable, Iterable, Optional, TextIO, TypeVar
 
 import click
 import frontmatter
 import yaml
 
-from . import __version__, utils
+
+from . import __version__, fixing, utils
 from .app import App
 from .linting import lint_file
 
@@ -24,6 +25,22 @@ unicode_log = logging.getLogger(f"{__name__}.unicode_file")
 STD_IN_INDEPENDENT = "Standard in (`-`) should be used independent of any other file"
 
 
+def either(x: bool, y: bool) -> bool:
+    return x | y
+
+
+def log_errors(func: Callable) -> Callable:
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Callable:
+        try:
+            return func(*args, **kwargs)
+        except Exception as exc:
+            log.error(f"Unhandled Exception: {exc}", exc_info=True)
+            raise
+
+    return wrapper
+
+
 @click.group()
 @click.option("--config-dir", type=click.Path(), envvar="NOTECLERK_CONFIG")
 @click.version_option(version=__version__, prog_name="note-clerk")
@@ -33,7 +50,8 @@ STD_IN_INDEPENDENT = "Standard in (`-`) should be used independent of any other 
     type=click.Choice(["WARNING", "INFO", "DEBUG"], case_sensitive=False),
 )
 @click.pass_context
-def cli(ctx: click.Context, config_dir: str, log_level: str) -> None:
+@log_errors
+def cli(ctx: click.Context, config_dir: Optional[str], log_level: str) -> None:
     """Note clerk application."""
     ctx.obj = App(config_dir=config_dir)
     logging.basicConfig(
@@ -48,6 +66,7 @@ def cli(ctx: click.Context, config_dir: str, log_level: str) -> None:
 
 @cli.command()
 @click.pass_obj
+@log_errors
 def info(app: App) -> None:
     """Show app configuration."""
     click.echo(f'Configuration Directory: "{app.config_dir}"')
@@ -57,13 +76,14 @@ T = TypeVar("T")
 TextAction = Callable[[TextIO, Optional[str]], T]
 
 
-def _apply_to_paths(paths: Tuple[str], action: TextAction) -> Iterable[T]:
+def _apply_to_paths(paths: Iterable[str], action: TextAction) -> Iterable[T]:
     log.debug(f"{paths=}")
     _paths = list(paths)
 
     if _paths.count("-") > 0 and _paths != ["-"]:
         raise click.BadArgumentUsage(STD_IN_INDEPENDENT)
     if _paths == ["-"]:
+        log.debug("Text coming from stdin")
         yield from action(sys.stdin, None)
     else:
         try:
@@ -84,7 +104,8 @@ def _apply_to_paths(paths: Tuple[str], action: TextAction) -> Iterable[T]:
 @click.argument("paths", nargs=-1, type=click.Path())
 @click.pass_obj
 @click.pass_context
-def lint(ctx: click.Context, app: App, paths: Tuple[str]) -> None:
+@log_errors
+def lint(ctx: click.Context, app: App, paths: Iterable[str]) -> None:
     """Lint all files selected by the given paths."""
     # TODO: checks should come from plugins
     lint_checks = app.lint_checks
@@ -97,10 +118,19 @@ def lint(ctx: click.Context, app: App, paths: Tuple[str]) -> None:
             click.echo(f"{_filename}:{lint.line}:{lint.column} | {lint.error}")
         yield found_lint
 
-    either: Callable[[bool, bool], bool] = lambda x, y: x | y
-
     found_lint = reduce(either, _apply_to_paths(paths, _lint_text), False)
     if found_lint:
+        ctx.exit(10)
+
+
+@cli.command()
+@click.argument("paths", nargs=-1, type=click.Path())
+@click.pass_obj
+@click.pass_context
+@log_errors
+def fix(ctx: click.Context, app: App, paths: Iterable[str]) -> None:
+    error = reduce(either, _apply_to_paths(paths, fixing.update_text), False)
+    if error:
         ctx.exit(10)
 
 
@@ -133,7 +163,7 @@ class FileTag:
 @analyze.command()
 @click.argument("paths", nargs=-1, type=click.Path())
 @click.pass_obj
-def list_tags(app: App, paths: Tuple[str]) -> None:
+def list_tags(app: App, paths: Iterable[str]) -> None:
     """List all tags in given notes."""
     TAG = r"#(#+)?[^\s\"'`\.,!#\]|)}/\\]+"
     TAG_FINDER = re.compile(r"(^" + TAG + r"|(?<=[\s\"'])" + TAG + r")")
@@ -199,7 +229,7 @@ class FileValue:
 @analyze.command()
 @click.argument("paths", nargs=-1, type=click.Path())
 @click.pass_obj
-def list_types(app: App, paths: Tuple[str]) -> None:
+def list_types(app: App, paths: Iterable[str]) -> None:
     """List all types in given notes."""
 
     def _list_types(text: TextIO, filename: Optional[str]) -> Iterable[FileValue]:

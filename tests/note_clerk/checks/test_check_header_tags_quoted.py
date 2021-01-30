@@ -18,7 +18,13 @@ LINT_CASES = [
         description="tags should be a quoted array",
         variables=LintDetails(
             content=inline_header("tags: [#value]"),
-            errors=[linting.LintError(line=2, column=7, error="header-tags-quoted",)],
+            errors=[
+                linting.LintError(
+                    line=2,
+                    column=7,
+                    error="header-tags-quoted",
+                )
+            ],
         ),
     ),
     ParamCase(
@@ -27,33 +33,51 @@ LINT_CASES = [
         variables=LintDetails(
             content=inline_header("tags: [#value, #value2]"),
             errors=[
-                linting.LintError(line=2, column=7, error="header-tags-quoted",),
-                linting.LintError(line=2, column=15, error="header-tags-quoted",),
+                linting.LintError(
+                    line=2,
+                    column=7,
+                    error="header-tags-quoted",
+                ),
+                linting.LintError(
+                    line=2,
+                    column=15,
+                    error="header-tags-quoted",
+                ),
             ],
         ),
     ),
     ParamCase(
         id="HEAD_TAGS_QUOTED_PASS",
         description="Quoted array should pass",
-        variables=LintDetails(content=inline_header('tags: ["#value"]'), errors=[],),
+        variables=LintDetails(
+            content=inline_header('tags: ["#value"]'),
+            errors=[],
+        ),
     ),
     ParamCase(
         id="HEAD_TAGS_QUOTED_PASS_SINGLE_QUOTE",
         description="Quoted array should pass",
-        variables=LintDetails(content=inline_header("tags: ['#value']"), errors=[],),
+        variables=LintDetails(
+            content=inline_header("tags: ['#value']"),
+            errors=[],
+        ),
     ),
     ParamCase(
         id="HEAD_TAGS_COMMENT",
         description="Comment should be allowed",
         variables=LintDetails(
-            content=inline_header('tags: ["#value"] # comment'), errors=[],
+            content=inline_header('tags: ["#value"] # comment'),
+            errors=[],
         ),
     ),
 ]
 
 
 @pytest.mark.parametrize(**paramaterize_cases(LINT_CASES))
-def test_lints(content: str, errors: LintErrors,) -> None:
+def test_lints(
+    content: str,
+    errors: LintErrors,
+) -> None:
     """Test lints are identified correctly."""
     lints = list(
         linting.lint_file(

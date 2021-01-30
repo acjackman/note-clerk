@@ -1,13 +1,20 @@
 [tool.poetry]
 name = "note-clerk"
-version = "0.0.9"
+version = "0.0.10"
 authors = ["Adam Jackman <adam@acjackman.com>"]
-description = "Command to manage plain text notes."
+description = "Utility to manage plain text notes."
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/<your-username>/hypermodern-python"
-repository = "https://github.com/<your-username>/hypermodern-python"
+homepage = "https://github.com/acjackman/note-clerk"
+repository = "https://github.com/acjackman/note-clerk"
 documentation = "https://note-clerk.readthedocs.io"
+packages = [
+    { include = "note_clerk", from = "src" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -17,27 +24,30 @@ desert = "^2020.1.6"
 marshmallow = "^3.5.1"
 boltons = "^20.0.0"
 python-frontmatter = "^0.5.0"
+"ruamel.yaml" = "^0.16.12"
+orderedset = "^2.0.3"
+python-dateutil = "^2.8.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.3.5"
 pytest-mock = "^2.0.0"
 coverage = {extras = ["toml"], version = "^5.0.3"}
 pytest-cov = "^2.8.1"
-black = "^19.10b0"
+black = "^20.8b1"
 flake8 = "^3.7.9"
 flake8-bandit = "^2.1.2"
 flake8-black = "^0.1.1"
 flake8-bugbear = "^20.1.4"
 flake8-import-order = "^0.18.1"
 safety = "^1.8.5"
-mypy = "^0.770"
+mypy = "^0.800"
 # pytype = {version = "^2020.2.20", python = "3.7"}
-typeguard = "^2.7.1"
+typeguard = "^2.10.0"
 flake8-annotations = "^2.0.1"
 flake8-docstrings = "^1.5.0"
 darglint = "^1.2.0"
 xdoctest = "^0.11.0"
-sphinx = "^2.4.4"
+sphinx = "^3.0.0"
 sphinx-autodoc-typehints = "^1.10.3"
 codecov = "^2.0.16"
 
