@@ -1,12 +1,13 @@
 from dataclasses import dataclass
+import datetime as dt
 import logging
+from typing import Any, List, Optional
 
 from click.testing import CliRunner
 import pytest
 
-from note_clerk import console
+from note_clerk import console, fixing
 from ._utils import FileFactory, inline_note, show_output
-
 
 log = logging.getLogger(__name__)
 
@@ -29,12 +30,20 @@ class FixCase:
 
     @property
     def code(self) -> str:
-        return self.name.lower().replace(" ", "-")
+        slug_replacements = {
+            " ": "-",
+            "'": "",
+            '"': "",
+        }
+        slug = self.name.lower()
+        for char, to in slug_replacements.items():
+            slug = slug.replace(char, to)
+        return slug
 
 
 FIXES = [
     FixCase(
-        name="Change YAML Header",
+        name="Empty YAML Header doesn't change",
         original="""
         ---
         ---
@@ -196,3 +205,82 @@ def test_unfixible(cli_runner: CliRunner, case: FixCase) -> None:
     )
     show_output(result)
     assert result.exit_code != 0
+
+
+@pytest.mark.parametrize(
+    "test_value,expected",
+    [
+        (dt.datetime(2020, 1, 1), dt.datetime(2020, 1, 1)),
+        ("2020-01-01", dt.datetime(2020, 1, 1)),
+    ],
+    ids=lambda v: f"{type(v).__name__}-{v}",
+)
+def test_as_date(test_value: fixing.DateLike, expected: dt.datetime) -> None:
+    assert fixing.as_date(test_value) == expected
+
+
+@pytest.mark.parametrize(
+    "x,y,expected",
+    [
+        (dt.datetime(2020, 1, 1), dt.datetime(2020, 1, 2), dt.datetime(2020, 1, 1)),
+        (dt.datetime(2020, 1, 2), dt.datetime(2020, 1, 1), dt.datetime(2020, 1, 1)),
+    ],
+    ids=lambda v: f"{v:%Y-%m-%d}",
+)
+def test_min_date(expected: dt.datetime, x: dt.datetime, y: dt.datetime) -> None:
+    assert fixing.min_date(x, y) == expected
+
+
+@pytest.mark.parametrize(
+    "key,x,y",
+    [
+        ("created", int(1), dt.datetime(2020, 1, 2)),
+        ("any", 1, None),
+        ("any", None, 2),
+        ("any", "foo", "bar"),
+    ],
+)
+def test_min_date_error(key: str, x: Any, y: Any) -> None:
+    with pytest.raises(fixing.UnableFix):
+        fixing.merge_values(key, x, y)
+
+
+@pytest.mark.parametrize(
+    "filename, expected",
+    [
+        (None, None),
+        ("1234.md", "12340000000000.md"),
+        ("123456789012345.md", "123456789012345.md"),
+    ],
+)
+def test_fix_filename(filename: Optional[str], expected: Optional[str]) -> None:
+    assert fixing.fix_filename(filename) == expected
+
+
+OVERWRIITE_CASES = [
+    ("12340000000001.md", "1234.md", ["12340000000000.md"]),
+    ("12340000000002.md", "1234.md", ["12340000000000.md", "12340000000001.md"]),
+    ("01234000000001.md", "01234.md", ["01234000000000.md"]),
+]
+
+
+@pytest.mark.parametrize(
+    "expected,filename,overlap_names",
+    OVERWRIITE_CASES,
+    ids=lambda x: x,
+)
+def test_fix_filename_dosnt_overwrite(
+    filename: str,
+    expected: str,
+    overlap_names: List[str],
+    file_factory: FileFactory,
+) -> None:
+    note = file_factory(filename, content="note_1")
+    log.debug(f"{note=}")
+    overlaps = [
+        file_factory(name, content=f"note_{i}") for i, name in enumerate(overlap_names)
+    ]
+    correct = file_factory(expected, path_only=True)
+    assert fixing.fix_filename(str(note)) == str(correct)
+    # for i, overlap in enumerate(overlaps):
+    assert correct.name == expected

@@ -44,15 +44,15 @@ def min_date(existing: DateLike, new: DateLike) -> DateLike:
 def merge_values(key: str, existing: Any, new: Any) -> Any:
     if isinstance(existing, list) and isinstance(new, list):
         return list(OrderedSet(existing + new))
-    elif existing == new:
+    if existing == new:
         return existing
-    elif key == "created":
+    if key == "created":
         try:
             log.debug(f"{type(existing)=} {type(new)=}")
             return min_date(existing, new)
         except (TypeError, ValueError):
             pass
-    elif isinstance(existing, int) or isinstance(new, int):
+    if isinstance(existing, int) or isinstance(new, int):
         raise UnableFix("Unable to join integers")
     raise UnableFix("Unable to join constants")
 
@@ -90,14 +90,25 @@ def fix_filename(filename: Optional[str]) -> Optional[str]:
     stem = path.stem
     match = ID_REGEX.match(stem)
     log.debug(f"{match=}")
-    if match:
-        note_id = match.groups()[0]
-        if len(note_id) == 14:
-            return filename
-        elif len(note_id) < 14:
-            new_filename = stem.replace(note_id, note_id.ljust(14, "0")) + path.suffix
+    if match is None:
+        return filename
+    orig_note_id = match.groups()[0]
+    if len(orig_note_id) == 14:
+        return filename
+    elif len(orig_note_id) < 14:
+        note_id = orig_note_id.ljust(14, "0")
+        new_filename = stem.replace(orig_note_id, note_id) + path.suffix
+        log.debug(f"{new_filename=}")
+        new_path = path.parent / new_filename
+        while new_path.exists():
+            rename_match = ID_REGEX.match(new_filename)
+            assert rename_match is not None  # noqa: S101
+            note_id = rename_match.groups()[0]
+            updated_id = str(int(note_id) + 1).rjust(14, "0")
+            new_filename = new_filename.replace(note_id, updated_id)
+            log.debug(f"{new_filename=}")
             new_path = path.parent / new_filename
-            return str(new_path)
+        return str(new_path)
     return filename
 
 
@@ -128,20 +139,13 @@ def raised_error(func: Callable) -> Callable:
 @raised_error
 def update_text(
     text: TextIO,
-    filename: Optional[str],
+    filename: str,
 ) -> None:
     log.debug(f"{filename=}")
     n_text, n_filename = fix_text(text, filename)
-
-    if n_filename is None:
-        click.echo(n_text.strip())
-    # elif base_path is None:
-    #     raise Exception("base_path must not be none if null filename")
-    else:
-        with atomic_save(n_filename, overwrite=True) as f:
-            f.write(n_text.encode("utf-8"))
-
-        log.debug(f"\n  {filename=}\n{n_filename=}")
-        if filename is not None and filename != n_filename:
-            log.debug("Deleting file")
-            Path(filename).unlink()
+    with atomic_save(n_filename, overwrite=True) as f:
+        f.write(n_text.encode("utf-8"))
+    log.debug(f"\n  {filename=}\n{n_filename=}")
+    if filename is not None and filename != n_filename:
+        log.debug("Deleting file")
+        Path(filename).unlink()
