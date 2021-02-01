@@ -152,7 +152,7 @@ toml = ["toml"]
 
 [[package]]
 name = "darglint"
-version = "1.5.8"
+version = "1.6.0"
 description = "A utility for ensuring Google-style docstrings stay up to date with the source code."
 category = "dev"
 optional = false
@@ -895,7 +895,7 @@ tests = ["pytest", "pytest-cov", "codecov", "scikit-build", "cmake", "ninja", "p
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "fd5fb59a607e598e2d3ed5287f4d84f510a0be20239f77cdd6aa4e8921f4b0b5"
+content-hash = "c7da18f66fc1e60bb9ed2f4da97bc4fd982c695c22aa8c78f64b525539add0e2"
 
 [metadata.files]
 alabaster = [
@@ -1002,8 +1002,8 @@ coverage = [
     {file = "coverage-5.4.tar.gz", hash = "sha256:6d2e262e5e8da6fa56e774fb8e2643417351427604c2b177f8e8c5f75fc928ca"},
 ]
 darglint = [
-    {file = "darglint-1.5.8-py3-none-any.whl", hash = "sha256:2e1012945a09d19a15cc87f9d15e7b14c18473ec9cf7769c641951b348de1353"},
-    {file = "darglint-1.5.8.tar.gz", hash = "sha256:529f4969029d5ff5f74bfec48adc14b6f003409141f722b6cc4b787dddc8a4dd"},
+    {file = "darglint-1.6.0-py3-none-any.whl", hash = "sha256:c80849fd83a06d0bec3c93240360214cf56979691c6d18e2abb293aa404bf443"},
+    {file = "darglint-1.6.0.tar.gz", hash = "sha256:9c91a1dd93f6cdbdd626ecea8ae2849fafe6588bb6d6dbbf7066f9ae69fca771"},
 ]
 desert = [
     {file = "desert-2020.11.18-py3-none-any.whl", hash = "sha256:6392702be7952fb9c8bbc775425fa929c1eab5c06552c2890e82a24964eeb084"},
@@ -1123,14 +1123,6 @@ markupsafe = [
     {file = "MarkupSafe-1.1.1-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:feb7b34d6325451ef96bc0e36e1a6c0c1c64bc1fbec4b854f4529e51887b1621"},
     {file = "MarkupSafe-1.1.1-cp39-cp39-win32.whl", hash = "sha256:22c178a091fc6630d0d045bdb5992d2dfe14e3259760e713c490da5323866c39"},
     {file = "MarkupSafe-1.1.1-cp39-cp39-win_amd64.whl", hash = "sha256:b7d644ddb4dbd407d31ffb699f1d140bc35478da613b441c582aeb7c43838dd8"},
-    {file = "MarkupSafe-1.1.1-pp36-pypy36_pp73-macosx_10_9_x86_64.whl", hash = "sha256:3db7af9025f66e08c781093dbdb7b54e52b5506006e141dcbe5b740e578b5504"},
-    {file = "MarkupSafe-1.1.1-pp36-pypy36_pp73-manylinux1_x86_64.whl", hash = "sha256:0db2ff381c2218c1ba7192f75e5c5cf180efa023ddfc6914ffe9a38b2bd303dd"},
-    {file = "MarkupSafe-1.1.1-pp36-pypy36_pp73-manylinux2010_x86_64.whl", hash = "sha256:5079d5041ace388bb57a5ebe38ae585fb18bc681a669030d76f99b510b33d53e"},
-    {file = "MarkupSafe-1.1.1-pp36-pypy36_pp73-win32.whl", hash = "sha256:8b7fb692d27d6e17ca0fbcbc0edd7b32790e7c070624211499db5a758e89e38d"},
-    {file = "MarkupSafe-1.1.1-pp37-pypy37_pp73-macosx_10_9_x86_64.whl", hash = "sha256:c6ccfab7baaf835fa90cb7ef3e9e7c240e84394420a5d33ba707f05318522fd6"},
-    {file = "MarkupSafe-1.1.1-pp37-pypy37_pp73-manylinux1_x86_64.whl", hash = "sha256:5eba30ae5ad72351903ba340a6b4e427353de04542f36fc177ebaffafb8ae5e7"},
-    {file = "MarkupSafe-1.1.1-pp37-pypy37_pp73-manylinux2010_x86_64.whl", hash = "sha256:c6fc95b4f707efd506f3f7789140db9cec1b731999e7f033371bb6a5006a1ef8"},
-    {file = "MarkupSafe-1.1.1-pp37-pypy37_pp73-win32.whl", hash = "sha256:de603df0d005177f7ef7faa56578d2d47fc93aaef165cdef91d64959176edb15"},
     {file = "MarkupSafe-1.1.1.tar.gz", hash = "sha256:29872e92839765e546828bb7754a68c418d927cd064fd4708fab9fe9c8bb116b"},
 ]
 marshmallow = [
