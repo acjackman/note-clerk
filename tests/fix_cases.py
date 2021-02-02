@@ -205,6 +205,14 @@ UNFIXABLE = [
         """,
     ),
     UnfixableCase(
+        name="Mismatched Quotes",
+        original="""
+        ---
+        tags: ['#bad-quotes"]
+        ---
+        """,
+    ),
+    UnfixableCase(
         name="Duplicate key in header",
         original="""
         ---
@@ -213,12 +221,6 @@ UNFIXABLE = [
         ---
         """,
     ),
-    # UnfixableCase(
-    #     name="Uncloased header",
-    #     original="""
-    #     ---
-    #     """,
-    # ),
 ]
 
 

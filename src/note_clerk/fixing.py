@@ -12,6 +12,7 @@ from orderedset import OrderedSet
 from ruamel.yaml import YAML
 from ruamel.yaml.constructor import DuplicateKeyError
 from ruamel.yaml.parser import ParserError
+from ruamel.yaml.scanner import ScannerError
 from ruamel.yaml.timestamp import TimeStamp
 
 from . import utils
@@ -120,7 +121,7 @@ def fix_text(text: TextIO, filename: Optional[str]) -> Tuple[str, Optional[str]]
         new_header = fix_header(header)
     except UnableFix:
         raise
-    except ParserError as e:
+    except (ParserError, ScannerError) as e:
         raise UnableFix("Malformed header") from e
     except DuplicateKeyError as e:
         raise UnableFix("Duplicate Key found in header document") from e
