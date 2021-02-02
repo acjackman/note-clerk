@@ -74,7 +74,7 @@ FIXES = [
         tags:
         - '#tag2'
         - '#inbox'
-        ***
+        ---
         # Test Note
         """,
     ),
@@ -92,7 +92,7 @@ FIXES = [
         fixed="""
         ---
         created: 2020-11-15T05:42:49.301000Z
-        ***
+        ---
         # Test Note
         """,
     ),
@@ -136,6 +136,16 @@ FIXES = [
         # Title
         """,
         filename="123456789012345.md",
+    ),
+    FixCase(
+        name="Multi-indent list unchanged",
+        original="""
+        - L1 item 1
+            - L2 item 1.1
+                - L3 item 1.1.1
+            - 1.2
+        - 2
+        """,
     ),
 ]
 
@@ -193,6 +203,30 @@ UNFIXABLE = [
         k1: 2
         ---
         # Test Note
+        """,
+    ),
+    FixCase(
+        name="Unquoted tag in Array",
+        original="""
+        ---
+        tags: ["#tag-a", #tag-b]
+        ---
+        # Note
+        """,
+    ),
+    FixCase(
+        name="Duplicate key in header",
+        original="""
+        ---
+        key1: foo
+        key1: bar
+        ---
+        """,
+    ),
+    FixCase(
+        name="Uncloased header",
+        original="""
+        ---
         """,
     ),
 ]

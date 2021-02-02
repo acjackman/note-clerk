@@ -9,10 +9,12 @@ from boltons.fileutils import atomic_save
 from dateutil.parser import parse as parse_date
 from orderedset import OrderedSet
 from ruamel.yaml import YAML
+from ruamel.yaml.constructor import DuplicateKeyError
+from ruamel.yaml.parser import ParserError
 from ruamel.yaml.timestamp import TimeStamp
 
 from . import utils
-from .utils import ensure_newline
+from .utils import ensure_newline, UnclosedHeader
 
 
 log = logging.getLogger(__name__)
@@ -60,14 +62,14 @@ def fix_header(header: str) -> str:
     output = io.StringIO()
     yaml = YAML(output=output)
     header_docs = [h for h in yaml.load_all(header) if h is not None]  # noqa: S506
-    log.debug(f"header_docs:\n{header_docs}")
 
     if len(header_docs) < 2:
-        return header
+        if len(header) == 0:
+            return header
+        return ensure_newline(header)
 
     combined: Dict[str, Any] = {}
     for doc in header_docs:
-        log.debug(f"doc:\n{doc}")
         for key, value in sorted(doc.items(), key=lambda t: t[0]):
             try:
                 combined[key] = merge_values(key, combined[key], value)
@@ -75,8 +77,7 @@ def fix_header(header: str) -> str:
                 combined[key] = value
 
     yaml.dump(combined, output)
-
-    return f"---\n{output.getvalue().strip()}\n***\n"
+    return f"---\n{output.getvalue().strip()}\n---\n"
 
 
 ID_REGEX = re.compile(r"^([0-9]+)")
@@ -88,7 +89,6 @@ def fix_filename(filename: Optional[str]) -> Optional[str]:
     path = Path(filename)
     stem = path.stem
     match = ID_REGEX.match(stem)
-    log.debug(f"{match=}")
     if match is None:
         return filename
     orig_note_id = match.groups()[0]
@@ -112,14 +112,25 @@ def fix_filename(filename: Optional[str]) -> Optional[str]:
 
 
 def fix_text(text: TextIO, filename: Optional[str]) -> Tuple[str, Optional[str]]:
-    header, body = utils.split_header([line.strip() for line in text.readlines()])
     try:
+        header, body = utils.split_header(
+            [line.removesuffix("\n") for line in text.readlines()]
+        )
         new_header = fix_header(header)
-    except Exception:
-        log.error("error creating header", exc_info=True)
+    except UnableFix:
         raise
-    log.debug(f"new_header:\n{new_header}")
-    new_note: str = ensure_newline(new_header) + ensure_newline(body.strip())
+    except ParserError as e:
+        raise UnableFix("Malformed header") from e
+    except DuplicateKeyError as e:
+        raise UnableFix("Duplicate Key found in header document") from e
+    except UnclosedHeader as e:
+        raise UnableFix("Unclosed header") from e
+    except UnicodeDecodeError as e:  # pragma: no cover
+        raise UnableFix("Invalid File") from e
+    except Exception as e:  # pragma: no cover
+        log.error(f"error creating header for {filename}", exc_info=True)
+        raise UnableFix("Unknown Error") from e
+    new_note: str = new_header + ensure_newline(body)
     new_filename = fix_filename(filename)
     return new_note, new_filename
 
@@ -144,7 +155,6 @@ def update_text(
     n_text, n_filename = fix_text(text, filename)
     with atomic_save(n_filename, overwrite=True) as f:
         f.write(n_text.encode("utf-8"))
-    log.debug(f"\n  {filename=}\n{n_filename=}")
     if filename is not None and filename != n_filename:
         log.debug("Deleting file")
         Path(filename).unlink()
