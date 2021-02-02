@@ -17,6 +17,8 @@ def test_fixes_stdin(
     cli_runner: CliRunner,
     case: FixCase,
 ) -> None:
+    if case.skip:
+        pytest.skip("Skipped")
     result = cli_runner.invoke(
         console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
     )
@@ -31,6 +33,8 @@ def test_fixes_files(
     file_factory: FileFactory,
     case: FixCase,
 ) -> None:
+    if case.skip:
+        pytest.skip("Skipped")
     note = file_factory(case.filename, case.original)
     result = cli_runner.invoke(
         console.cli,
@@ -50,6 +54,8 @@ def test_fixes_files(
 
 @pytest.mark.parametrize("case", stdin_cases(UNFIXABLE), ids=lambda c: c.code)
 def test_unfixible_stdin(cli_runner: CliRunner, case: UnfixableCase) -> None:
+    if case.skip:
+        pytest.skip("Skipped")
     result = cli_runner.invoke(
         console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
     )
@@ -63,6 +69,8 @@ def test_unfixible_files(
     file_factory: FileFactory,
     case: UnfixableCase,
 ) -> None:
+    if case.skip:
+        pytest.skip("Skipped")
     note = file_factory(case.filename, case.original)
     result = cli_runner.invoke(console.cli, ["--log-level=DEBUG", "fix", str(note)])
     show_output(result)

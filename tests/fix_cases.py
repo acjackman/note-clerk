@@ -27,6 +27,7 @@ class FixCase(Case):
     fixed: str = ""
     filename: str = "-"
     newname: str = ""
+    skip: bool = False
 
     def __post_init__(self) -> None:
         self.original = inline_note(self.original, trailing_newline=True)
@@ -143,6 +144,23 @@ FIXES = [
         - 2
         """,
     ),
+    FixCase(
+        name="Multi-indent list unchanged",
+        original="""
+        ---
+        created: 2021-01-23T03:19:02.002Z
+        ---
+        ---
+        created: 2021-01-22T20:22:59-0700
+        ---
+        """,
+        fixed="""
+        ---
+        created: 2021-01-22T20:22:59-0700
+        ---
+        """,
+        skip=True,
+    ),
 ]
 
 
@@ -152,6 +170,7 @@ class UnfixableCase(Case):
     original: str
     filename: str = "-"
     newname: str = ""
+    skip: bool = False
 
     def __post_init__(self) -> None:
         self.original = inline_note(self.original, trailing_newline=True)

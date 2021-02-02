@@ -52,8 +52,10 @@ def merge_values(key: str, existing: Any, new: Any) -> Any:
     if key == "created":
         try:
             log.debug(f"{type(existing)=} {type(new)=}")
+            log.debug(f"{existing=} {new=}")
             return min_date(existing, new)
         except (TypeError, ValueError):
+            log.warning("error with min_date", exc_info=True)
             pass
     if isinstance(existing, int) or isinstance(new, int):
         raise UnableFix("Unable to join integers")
