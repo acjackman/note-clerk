@@ -138,11 +138,12 @@ def fix_text(text: TextIO, filename: Optional[str]) -> Tuple[str, Optional[str]]
 
 
 def raised_error(func: Callable) -> Callable:
-    def wrapper(*args: Any, **kwargs: Any) -> Iterable[bool]:
+    def wrapper(text: TextIO, filename: str) -> Iterable[bool]:
         try:
-            func(*args, **kwargs)
+            func(text, filename)
             yield False
-        except UnableFix:
+        except UnableFix as e:
+            log.warning(f"Unable to fix '{filename or 'stdin'}': {e} ")
             yield True
 
     return wrapper
@@ -162,5 +163,5 @@ def update_text(
         with atomic_save(n_filename, overwrite=True) as f:
             f.write(n_text.encode("utf-8"))
         if filename is not None and filename != n_filename:
-            log.debug("Deleting file")
+            log.debug(f"Deleting file: {filename}")
             Path(filename).unlink()
