@@ -7,49 +7,70 @@ import pytest
 
 from note_clerk import console, fixing
 from ._utils import FileFactory, show_output
-from .fix_cases import FixCase, FIXES, UNFIXABLE
+from .fix_cases import file_cases, FixCase, FIXES, stdin_cases, UNFIXABLE, UnfixableCase
 
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.parametrize("case", FIXES, ids=lambda c: c.code)
-def test_fixes(
+@pytest.mark.parametrize("case", stdin_cases(FIXES), ids=lambda c: c.code)
+def test_fixes_stdin(
+    cli_runner: CliRunner,
+    case: FixCase,
+) -> None:
+    result = cli_runner.invoke(
+        console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
+    )
+    show_output(result)
+    assert result.exit_code == 0
+    assert result.output == case.fixed
+
+
+@pytest.mark.parametrize("case", file_cases(FIXES), ids=lambda c: c.code)
+def test_fixes_files(
     cli_runner: CliRunner,
     file_factory: FileFactory,
     case: FixCase,
 ) -> None:
-    if case.name == "-":
-        result = cli_runner.invoke(
-            console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
-        )
-        show_output(result)
-        assert result.exit_code == 0
-        assert result.output == case.fixed
-    else:
-        note = file_factory(case.filename, case.original)
-        result = cli_runner.invoke(
-            console.cli,
-            ["--log-level=DEBUG", "fix", str(note)],
-        )
-        show_output(result)
-        assert result.exit_code == 0
+    note = file_factory(case.filename, case.original)
+    result = cli_runner.invoke(
+        console.cli,
+        ["--log-level=DEBUG", "fix", str(note)],
+    )
+    show_output(result)
+    assert result.exit_code == 0
 
-        fixed_note = file_factory(case.newname, path_only=True)
-        with fixed_note.open() as f:
-            fixed = f.read()
+    fixed_note = file_factory(case.newname, path_only=True)
+    with fixed_note.open() as f:
+        fixed = f.read()
 
-        assert fixed == case.fixed
-        if case.filename != case.newname:
-            not note.exists()
+    assert fixed == case.fixed
+    if case.filename != case.newname:
+        not note.exists()
 
 
-@pytest.mark.parametrize("case", UNFIXABLE, ids=lambda c: c.code)
-def test_unfixible(cli_runner: CliRunner, case: FixCase) -> None:
+@pytest.mark.parametrize("case", stdin_cases(UNFIXABLE), ids=lambda c: c.code)
+def test_unfixible_stdin(cli_runner: CliRunner, case: UnfixableCase) -> None:
     result = cli_runner.invoke(
         console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
     )
     show_output(result)
     assert result.exit_code != 0
+
+
+@pytest.mark.parametrize("case", file_cases(UNFIXABLE), ids=lambda c: c.code)
+def test_unfixible_files(
+    cli_runner: CliRunner,
+    file_factory: FileFactory,
+    case: UnfixableCase,
+) -> None:
+    note = file_factory(case.filename, case.original)
+    result = cli_runner.invoke(console.cli, ["--log-level=DEBUG", "fix", str(note)])
+    show_output(result)
+    assert result.exit_code != 0
+    assert note.exists()
+    if case.filename != case.newname:
+        fixed_note = file_factory(case.newname, path_only=True)
+        assert fixed_note.exists() is False
 
 
 @pytest.mark.parametrize(

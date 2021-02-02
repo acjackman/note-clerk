@@ -6,6 +6,7 @@ import re
 from typing import Any, Callable, Dict, Iterable, Optional, TextIO, Tuple, Union
 
 from boltons.fileutils import atomic_save
+import click
 from dateutil.parser import parse as parse_date
 from orderedset import OrderedSet
 from ruamel.yaml import YAML
@@ -153,8 +154,12 @@ def update_text(
 ) -> None:
     log.debug(f"{filename=}")
     n_text, n_filename = fix_text(text, filename)
-    with atomic_save(n_filename, overwrite=True) as f:
-        f.write(n_text.encode("utf-8"))
-    if filename is not None and filename != n_filename:
-        log.debug("Deleting file")
-        Path(filename).unlink()
+
+    if n_filename is None:
+        click.echo(n_text, nl=False)
+    else:
+        with atomic_save(n_filename, overwrite=True) as f:
+            f.write(n_text.encode("utf-8"))
+        if filename is not None and filename != n_filename:
+            log.debug("Deleting file")
+            Path(filename).unlink()

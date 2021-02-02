@@ -1,10 +1,27 @@
 from dataclasses import dataclass
+from typing import Iterable, List, TypeVar
 
 from ._utils import inline_note
 
 
+class Case:
+    name: str
+
+    @property
+    def code(self) -> str:
+        slug_replacements = {
+            " ": "-",
+            "'": "",
+            '"': "",
+        }
+        slug = self.name.lower()
+        for char, to in slug_replacements.items():
+            slug = slug.replace(char, to)
+        return slug
+
+
 @dataclass()
-class FixCase:
+class FixCase(Case):
     name: str
     original: str
     fixed: str = ""
@@ -18,18 +35,6 @@ class FixCase:
         self.fixed = inline_note(self.fixed, trailing_newline=True)
         if self.newname == "":
             self.newname = self.filename
-
-    @property
-    def code(self) -> str:
-        slug_replacements = {
-            " ": "-",
-            "'": "",
-            '"': "",
-        }
-        slug = self.name.lower()
-        for char, to in slug_replacements.items():
-            slug = slug.replace(char, to)
-        return slug
 
 
 FIXES = [
@@ -141,8 +146,21 @@ FIXES = [
 ]
 
 
+@dataclass()
+class UnfixableCase(Case):
+    name: str
+    original: str
+    filename: str = "-"
+    newname: str = ""
+
+    def __post_init__(self) -> None:
+        self.original = inline_note(self.original, trailing_newline=True)
+        if self.newname == "":
+            self.newname = self.filename
+
+
 UNFIXABLE = [
-    FixCase(
+    UnfixableCase(
         name="unclosed header",
         original="""
         ---
@@ -153,7 +171,19 @@ UNFIXABLE = [
         # Test Note
         """,
     ),
-    FixCase(
+    UnfixableCase(
+        name="unclosed header in file",
+        original="""
+        ---
+        tags: ["#tag2"]
+        created: 2020-11-15T05:42:49.301Z
+        created: 2020-11-15T05:42:49.301Z
+        tags: ["#inbox"]
+        # Test Note
+        """,
+        filename="foo.md",
+    ),
+    UnfixableCase(
         name="duplicate keys integer values ",
         original="""
         ---
@@ -165,7 +195,7 @@ UNFIXABLE = [
         # Test Note
         """,
     ),
-    FixCase(
+    UnfixableCase(
         name="Unquoted tag in Array",
         original="""
         ---
@@ -174,7 +204,7 @@ UNFIXABLE = [
         # Note
         """,
     ),
-    FixCase(
+    UnfixableCase(
         name="Duplicate key in header",
         original="""
         ---
@@ -183,10 +213,21 @@ UNFIXABLE = [
         ---
         """,
     ),
-    FixCase(
-        name="Uncloased header",
-        original="""
-        ---
-        """,
-    ),
+    # UnfixableCase(
+    #     name="Uncloased header",
+    #     original="""
+    #     ---
+    #     """,
+    # ),
 ]
+
+
+C = TypeVar("C", FixCase, UnfixableCase)
+
+
+def stdin_cases(cases: Iterable[C]) -> List[C]:
+    return [c for c in cases if c.filename is None or c.filename == "-"]
+
+
+def file_cases(cases: Iterable[C]) -> List[C]:
+    return [c for c in cases if c.filename is not None and c.filename != "-"]
