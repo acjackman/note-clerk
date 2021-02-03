@@ -38,13 +38,10 @@ def as_date(value: DateLike) -> dt.datetime:
 def min_date(existing: DateLike, new: DateLike) -> DateLike:
     existing_date = as_date(existing)
     new_date = as_date(new)
-    try:
-        if existing_date <= new_date:
-            return existing
-        else:
-            return new
-    except TypeError:
-        raise UnableFix("Can't identify timezones")
+    if existing_date <= new_date:
+        return existing
+    else:
+        return new
 
 
 def merge_values(key: str, existing: Any, new: Any) -> Any:
@@ -57,9 +54,8 @@ def merge_values(key: str, existing: Any, new: Any) -> Any:
             log.debug(f"{type(existing)=} {type(new)=}")
             log.debug(f"{existing=} {new=}")
             return min_date(existing, new)
-        except (TypeError, ValueError):
-            log.warning("error with min_date", exc_info=True)
-            pass
+        except TypeError:
+            raise UnableFix("Can't identify timezones")
     if isinstance(existing, int) or isinstance(new, int):
         raise UnableFix("Unable to join integers")
     raise UnableFix("Unable to join constants")

@@ -12,13 +12,11 @@ from .fix_cases import file_cases, FixCase, FIXES, stdin_cases, UNFIXABLE, Unfix
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.parametrize("case", stdin_cases(FIXES), ids=lambda c: c.code)
+@pytest.mark.parametrize("case", stdin_cases(FIXES))
 def test_fixes_stdin(
     cli_runner: CliRunner,
     case: FixCase,
 ) -> None:
-    if case.skip:
-        pytest.skip("Skipped")
     result = cli_runner.invoke(
         console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
     )
@@ -27,14 +25,12 @@ def test_fixes_stdin(
     assert result.output == case.fixed
 
 
-@pytest.mark.parametrize("case", file_cases(FIXES), ids=lambda c: c.code)
+@pytest.mark.parametrize("case", file_cases(FIXES))
 def test_fixes_files(
     cli_runner: CliRunner,
     file_factory: FileFactory,
     case: FixCase,
 ) -> None:
-    if case.skip:
-        pytest.skip("Skipped")
     note = file_factory(case.filename, case.original)
     result = cli_runner.invoke(
         console.cli,
@@ -52,10 +48,8 @@ def test_fixes_files(
         not note.exists()
 
 
-@pytest.mark.parametrize("case", stdin_cases(UNFIXABLE), ids=lambda c: c.code)
+@pytest.mark.parametrize("case", stdin_cases(UNFIXABLE))
 def test_unfixible_stdin(cli_runner: CliRunner, case: UnfixableCase) -> None:
-    if case.skip:
-        pytest.skip("Skipped")
     result = cli_runner.invoke(
         console.cli, ["--log-level=DEBUG", "fix", "-"], input=case.original
     )
@@ -63,14 +57,12 @@ def test_unfixible_stdin(cli_runner: CliRunner, case: UnfixableCase) -> None:
     assert result.exit_code != 0
 
 
-@pytest.mark.parametrize("case", file_cases(UNFIXABLE), ids=lambda c: c.code)
+@pytest.mark.parametrize("case", file_cases(UNFIXABLE))
 def test_unfixible_files(
     cli_runner: CliRunner,
     file_factory: FileFactory,
     case: UnfixableCase,
 ) -> None:
-    if case.skip:
-        pytest.skip("Skipped")
     note = file_factory(case.filename, case.original)
     result = cli_runner.invoke(console.cli, ["--log-level=DEBUG", "fix", str(note)])
     show_output(result)

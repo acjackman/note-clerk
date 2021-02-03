@@ -1,11 +1,16 @@
 from dataclasses import dataclass
-from typing import Iterable, List, TypeVar
+from typing import Any, Dict, Iterable, List, Optional, TypeVar
+
+from _pytest.mark.structures import ParameterSet
+import pytest
 
 from ._utils import inline_note
 
 
 class Case:
     name: str
+    skip: bool = False
+    xfail: Optional[str] = None
 
     @property
     def code(self) -> str:
@@ -19,6 +24,15 @@ class Case:
             slug = slug.replace(char, to)
         return slug
 
+    @property
+    def as_param(self) -> ParameterSet:
+        kwargs: Dict[str, Any] = {"id": self.code}
+        if self.xfail is not None:
+            kwargs["marks"] = pytest.mark.xfail(reason=self.xfail)
+        if self.skip:
+            kwargs["marks"] = pytest.mark.skip()
+        return pytest.param(self, **kwargs)
+
 
 @dataclass()
 class FixCase(Case):
@@ -28,6 +42,7 @@ class FixCase(Case):
     filename: str = "-"
     newname: str = ""
     skip: bool = False
+    xfail: Optional[str] = None
 
     def __post_init__(self) -> None:
         self.original = inline_note(self.original, trailing_newline=True)
@@ -159,7 +174,7 @@ FIXES = [
         created: 2021-01-22T20:22:59-0700
         ---
         """,
-        skip=True,
+        xfail="ruamel.yaml doesn't identify Z as a timezone marker",
     ),
 ]
 
@@ -171,6 +186,7 @@ class UnfixableCase(Case):
     filename: str = "-"
     newname: str = ""
     skip: bool = False
+    xfail: Optional[str] = None
 
     def __post_init__(self) -> None:
         self.original = inline_note(self.original, trailing_newline=True)
@@ -246,9 +262,13 @@ UNFIXABLE = [
 C = TypeVar("C", FixCase, UnfixableCase)
 
 
-def stdin_cases(cases: Iterable[C]) -> List[C]:
-    return [c for c in cases if c.filename is None or c.filename == "-"]
+def is_stdin(case: C) -> bool:
+    return case.filename is None or case.filename == "-"
 
 
-def file_cases(cases: Iterable[C]) -> List[C]:
-    return [c for c in cases if c.filename is not None and c.filename != "-"]
+def stdin_cases(cases: Iterable[C]) -> List[ParameterSet]:
+    return [c.as_param for c in cases if is_stdin(c)]
+
+
+def file_cases(cases: Iterable[C]) -> List[ParameterSet]:
+    return [c.as_param for c in cases if not is_stdin(c)]
