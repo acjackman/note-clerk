@@ -143,7 +143,7 @@ def fix_text(text: TextIO, filename: Optional[str]) -> Tuple[str, Optional[str]]
 
 
 def raised_error(func: Callable) -> Callable:
-    def wrapper(text: TextIO, filename: str) -> Iterable[bool]:
+    def wrapper(text: TextIO, filename: Optional[str]) -> Iterable[bool]:
         try:
             func(text, filename)
             yield False
@@ -157,7 +157,7 @@ def raised_error(func: Callable) -> Callable:
 @raised_error
 def update_text(
     text: TextIO,
-    filename: str,
+    filename: Optional[str],
 ) -> None:
     log.debug(f"{filename=}")
     n_text, n_filename = fix_text(text, filename)
