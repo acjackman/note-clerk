@@ -1,16 +1,16 @@
 """Nox sessions."""
+from pathlib import Path
 import shutil
 import sys
-from pathlib import Path
 from textwrap import dedent
 
 import nox
-import nox_poetry.patch
 from nox.sessions import Session
+import nox_poetry.patch
 
 
 package = "note_clerk"
-python_versions = ["3.9", "3.8"]
+python_versions = ["3.9"]
 max_version = python_versions[0]
 nox.options.sessions = (
     "pre-commit",
@@ -167,7 +167,7 @@ DOC_REQUIREMENTS = [
 ]
 
 
-@nox.session(name="docs-build", python="3.8")
+@nox.session(name="docs-build", python=max_version)
 def docs_build(session: Session) -> None:
     """Build the documentation."""
     args = session.posargs or ["docs", "docs/_build"]

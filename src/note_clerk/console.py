@@ -34,6 +34,8 @@ def log_errors(func: Callable) -> Callable:
     def wrapper(*args: Any, **kwargs: Any) -> Callable:
         try:
             return func(*args, **kwargs)
+        except click.exceptions.Exit:
+            raise
         except Exception as exc:
             log.error(f"Unhandled Exception: {exc}", exc_info=True)
             raise
@@ -77,7 +79,6 @@ TextAction = Callable[[TextIO, Optional[str]], T]
 
 
 def _apply_to_paths(paths: Iterable[str], action: TextAction) -> Iterable[T]:
-    log.debug(f"{paths=}")
     _paths = list(paths)
 
     if _paths.count("-") > 0 and _paths != ["-"]:

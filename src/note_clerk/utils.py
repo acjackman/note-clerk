@@ -73,6 +73,10 @@ DOC_SEP = "---"
 DOC_STOP = "***"
 
 
+class UnclosedHeader(Exception):
+    """Unclosed Header found when parsing"""
+
+
 def split_header(lines: Sequence[str]) -> Tuple[str, str]:
     """Extract header from document."""
     if lines[0] != DOC_SEP:
@@ -100,6 +104,6 @@ def split_header(lines: Sequence[str]) -> Tuple[str, str]:
             break
 
     if doc is not None:
-        raise Exception("Unclosed header")
+        raise UnclosedHeader()
 
     return "\n".join(docs), "\n".join(lines[_i:])
