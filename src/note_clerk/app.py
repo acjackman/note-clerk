@@ -16,6 +16,7 @@ class App:
         """Initialize with config directory."""
         self.config_dir = Path(config_dir or ".").expanduser()
         log.info(f'Note Clerk using config dir: "{self.config_dir}"')
+        self.notes_dir = self.config_dir
 
     @property
     def lint_checks(self) -> LintChecks:

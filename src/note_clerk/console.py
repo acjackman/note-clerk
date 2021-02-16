@@ -55,15 +55,14 @@ def log_errors(func: Callable) -> Callable:
 @log_errors
 def cli(ctx: click.Context, config_dir: Optional[str], log_level: str) -> None:
     """Note clerk application."""
-    ctx.obj = App(config_dir=config_dir)
     logging.basicConfig(
         format="%(asctime)s %(levelname)-8s| %(message)s",
         datefmt="%Y-%m-%dT%H:%M:%S%z",
-        # level=log_level.upper(),
+        level=log_level.upper(),
     )
-    logger = logging.getLogger("note_clerk")
-    logger.setLevel(log_level.upper())
     unicode_log.setLevel(logging.ERROR)
+
+    ctx.obj = App(config_dir=config_dir)
 
 
 @cli.command()
@@ -251,3 +250,18 @@ def list_types(app: App, paths: Iterable[str]) -> None:
                 ]
             )
         )
+
+
+@cli.group()
+@click.pass_obj
+def plan(app: App) -> None:
+    pass
+
+
+@plan.command()
+@click.pass_obj
+def week(app: App) -> None:
+    from . import planning
+
+    plan = planning.create_plan_file(planning.last_monday(), app.notes_dir)
+    click.echo(plan)
