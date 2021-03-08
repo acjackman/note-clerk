@@ -61,5 +61,5 @@ def create_plan_file(date: dt.datetime, note_dir: Path) -> Path:
 
 
 def last_monday(date: Optional[dt.datetime] = None) -> dt.datetime:
-    date = date or dt.date.today()
+    date = date or dt.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     return date - dt.timedelta(days=date.weekday())
