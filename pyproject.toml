@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "note-clerk"
-version = "0.0.11"
+version = "0.0.12"
 authors = ["Adam Jackman <adam@acjackman.com>"]
 description = "Utility to manage plain text notes."
 license = "MIT"
@@ -48,9 +48,15 @@ xdoctest = "^0.15.4"
 sphinx = "^3.5.1"
 sphinx-autodoc-typehints = "^1.10.3"
 codecov = "^2.0.16"
+poethepoet = "^0.10.0"
+freezegun = "^1.1.0"
 
 [tool.poetry.scripts]
 note-clerk = "note_clerk.console:cli"
+
+[tool.poe.tasks]
+test = "pytest -m 'not e2e'"
+test-cov = "pytest --cov -m 'not e2e'"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
