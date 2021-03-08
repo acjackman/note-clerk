@@ -48,9 +48,14 @@ xdoctest = "^0.15.4"
 sphinx = "^3.0.0"
 sphinx-autodoc-typehints = "^1.10.3"
 codecov = "^2.0.16"
+poethepoet = "^0.10.0"
 
 [tool.poetry.scripts]
 note-clerk = "note_clerk.console:cli"
+
+[tool.poe.tasks]
+test = "pytest -m 'not e2e'"
+test-cov = "pytest --cov -m 'not e2e'"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
