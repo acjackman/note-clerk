@@ -603,7 +603,7 @@ six = ">=1.5"
 
 [[package]]
 name = "python-frontmatter"
-version = "0.5.0"
+version = "1.0.0"
 description = "Parse and manage posts with YAML (or other) frontmatter"
 category = "main"
 optional = false
@@ -611,7 +611,10 @@ python-versions = "*"
 
 [package.dependencies]
 PyYAML = "*"
-six = "*"
+
+[package.extras]
+docs = ["sphinx"]
+test = ["pytest", "toml", "pyaml"]
 
 [[package]]
 name = "pytz"
@@ -934,7 +937,7 @@ tests = ["pytest", "pytest-cov", "codecov", "scikit-build", "cmake", "ninja", "p
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "4b14daf30755feb92ccddfe6111045796548ffbe22173855679045e851300bd4"
+content-hash = "7fc721a3d57a931af8eb2896886e203b15b27f7bf6ef01437255f307d19e065b"
 
 [metadata.files]
 alabaster = [
@@ -1275,8 +1278,8 @@ python-dateutil = [
     {file = "python_dateutil-2.8.1-py2.py3-none-any.whl", hash = "sha256:75bb3f31ea686f1197762692a9ee6a7550b59fc6ca3a1f4b5d7e32fb98e2da2a"},
 ]
 python-frontmatter = [
-    {file = "python-frontmatter-0.5.0.tar.gz", hash = "sha256:a9c2e90fc38e9f0c68d8b82299040f331ca3b8525ac7fa5f6beffef52b26c426"},
-    {file = "python_frontmatter-0.5.0-py3-none-any.whl", hash = "sha256:a7dcdfdaf498d488dce98bfa9452f8b70f803a923760ceab1ebd99291d98d28a"},
+    {file = "python-frontmatter-1.0.0.tar.gz", hash = "sha256:e98152e977225ddafea6f01f40b4b0f1de175766322004c826ca99842d19a7cd"},
+    {file = "python_frontmatter-1.0.0-py3-none-any.whl", hash = "sha256:766ae75f1b301ffc5fe3494339147e0fd80bc3deff3d7590a93991978b579b08"},
 ]
 pytz = [
     {file = "pytz-2021.1-py2.py3-none-any.whl", hash = "sha256:eb10ce3e7736052ed3623d49975ce333bcd712c7bb19a58b9e2089d4057d0798"},
