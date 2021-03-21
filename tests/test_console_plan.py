@@ -1,4 +1,5 @@
 import datetime as dt
+from typing import List
 
 from click.testing import CliRunner
 from freezegun import freeze_time
@@ -15,7 +16,7 @@ from ._utils import FileFactory, show_output
         (dt.datetime(2021, 3, 7), dt.datetime(2021, 3, 1)),
     ],
 )
-def test_lint_stdin_clean(
+def test_plan_week(
     cli_runner: CliRunner,
     file_factory: FileFactory,
     current_date: dt.datetime,
@@ -35,13 +36,76 @@ def test_lint_stdin_clean(
 
     show_output(result)
     assert result.exit_code == 0
-
     assert expected_file.exists()
 
 
-def test_create_plan_file(file_factory: FileFactory) -> None:
+def test_create_week_plan_file_exists(file_factory: FileFactory) -> None:
     date = dt.datetime(2021, 3, 8)
     preexisting = file_factory(filename=f"{date:%Y%m%d}050000.md")
 
     with pytest.raises(FileExistsError):
-        planning.create_plan_file(date, preexisting.parent)
+        planning.create_week_plan_file(date, preexisting.parent)
+
+
+@pytest.mark.parametrize(
+    "current_date,plan_date,args",
+    [
+        (dt.datetime(2021, 3, 8), dt.datetime(2021, 3, 8), []),
+        (dt.datetime(2021, 3, 8), dt.datetime(2021, 3, 9), ["--next"]),
+        (dt.datetime(2021, 3, 8), dt.datetime(2021, 3, 7), ["--prev"]),
+    ],
+)
+def test_plan_day(
+    cli_runner: CliRunner,
+    file_factory: FileFactory,
+    current_date: dt.datetime,
+    plan_date: dt.datetime,
+    args: List[str],
+) -> None:
+    expected_file = file_factory(
+        filename=f"{plan_date:%Y%m%d}060000.md", path_only=True
+    )
+    tmpdir = expected_file.parent
+
+    assert not expected_file.exists()
+
+    with freeze_time(current_date):
+        result = cli_runner.invoke(
+            console.cli, [f"--config-dir={str(tmpdir)}", "plan", "day", *args]
+        )
+
+    show_output(result)
+    assert result.exit_code == 0
+    assert expected_file.exists()
+
+
+def test_plan_day_not_next_and_prev(
+    cli_runner: CliRunner,
+    file_factory: FileFactory,
+) -> None:
+    current_date = dt.datetime(2021, 3, 8)
+    plan_date = current_date
+    expected_file = file_factory(
+        filename=f"{plan_date:%Y%m%d}060000.md", path_only=True
+    )
+    tmpdir = expected_file.parent
+
+    assert not expected_file.exists()
+
+    with freeze_time(current_date):
+        result = cli_runner.invoke(
+            console.cli,
+            [f"--config-dir={str(tmpdir)}", "plan", "day", "--next", "--prev"],
+        )
+
+    show_output(result)
+    assert result.exit_code == 1
+    assert expected_file.exists() is False
+
+
+def test_create_day_plan_file_exists(file_factory: FileFactory) -> None:
+    date = dt.datetime(2021, 3, 8)
+    preexisting = file_factory(filename=f"{date:%Y%m%d}060000.md")
+
+    with pytest.raises(FileExistsError):
+        planning.create_day_plan_file(date, preexisting.parent)

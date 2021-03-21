@@ -190,3 +190,22 @@ def test_extract_header(text: str, header_lines: int) -> None:
 def test_ensure_newline() -> None:
     assert utils.ensure_newline("") == "\n"
     assert utils.ensure_newline("\n") == "\n"
+
+
+@pytest.mark.parametrize(
+    "month,quarter", zip(range(1, 12), [1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4])
+)
+def test_month_to_quarter(month: int, quarter: int) -> None:
+    assert utils.month_to_quarter(month) == quarter
+
+
+@pytest.mark.parametrize("newline", [True, False])
+def test_trim(newline: bool) -> None:
+    text = utils.trim(
+        """
+        Long
+        Text
+        """,
+        ensure_newline=newline,
+    )
+    assert text.endswith("\n") is newline
