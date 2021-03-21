@@ -1,5 +1,6 @@
 """Note clerk application."""
 from dataclasses import dataclass
+import datetime as dt
 from enum import Enum
 from functools import reduce, wraps
 import json
@@ -9,6 +10,7 @@ import sys
 from typing import Any, Callable, Iterable, Optional, TextIO, TypeVar
 
 import click
+from dateutil.parser import parse as parse_date
 import frontmatter
 import yaml
 
@@ -263,5 +265,33 @@ def plan(app: App) -> None:
 def week(app: App) -> None:
     from . import planning
 
-    plan = planning.create_plan_file(planning.last_monday(), app.notes_dir)
+    plan = planning.create_week_plan_file(planning.last_monday(), app.notes_dir)
     click.echo(plan)
+
+
+@plan.command()
+@click.pass_obj
+@click.option("--next", "next_date", is_flag=True)
+@click.option("--prev", "prev_date", is_flag=True)
+@click.option("--date", "date_text", default=lambda: f"{dt.datetime.now():%Y-%m-%d}")
+def day(app: App, next_date: bool, prev_date: bool, date_text: str) -> None:
+    from . import planning
+
+    date = parse_date(date_text)
+
+    if next_date and prev_date:
+        raise ScriptFailed("--next and --prev must not be passed together")
+    elif next_date:
+        date += dt.timedelta(days=1)
+    elif prev_date:
+        date -= dt.timedelta(days=1)
+
+    day_plan = planning.create_day_plan_file(date, app.notes_dir)
+    click.echo(day_plan)
+
+
+class ScriptFailed(click.ClickException):
+    exit_code = 1
+
+    def show(self, file: Any = None) -> None:
+        """Stub out the show to exit silently."""

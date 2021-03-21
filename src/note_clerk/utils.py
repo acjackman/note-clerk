@@ -1,6 +1,7 @@
 """Utility Functions for NoteClerk."""
-
+from inspect import cleandoc as multiline_trim
 import logging
+import math
 from pathlib import Path
 from typing import Iterable, Iterator, List, Sequence, Tuple
 
@@ -107,3 +108,14 @@ def split_header(lines: Sequence[str]) -> Tuple[str, str]:
         raise UnclosedHeader()
 
     return "\n".join(docs), "\n".join(lines[_i:])
+
+
+def month_to_quarter(x: int) -> int:
+    return math.ceil(x / 3)
+
+
+def trim(text: str, ensure_newline: bool = True) -> str:
+    text = multiline_trim(text).strip()
+    if ensure_newline:
+        return text + "\n"
+    return text

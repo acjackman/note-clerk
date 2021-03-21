@@ -1,65 +1,113 @@
 import datetime as dt
-from inspect import cleandoc as trim
+from functools import partial
 from pathlib import Path
 from typing import Optional
 
+from note_clerk import utils
 
-def generate_plan(date: dt.datetime) -> str:
-    def day(days: int = 0) -> str:
-        return f"{date + dt.timedelta(days=days):%A %Y-%m-%d}"
 
+def day_link(date: dt.datetime, days: int = 0, link_fmt: str = "%A %Y-%m-%d") -> str:
+    d = date + dt.timedelta(days=days)
+    return f"[[{d:%Y%m%d}060000|{d:link_fmt}]]"
+
+
+def week_label(date: dt.datetime) -> str:
+    week_num = date.isocalendar()[1]
+    return f"{date.year}W{week_num:02d}"
+
+
+def week_link(date: dt.datetime, link_fmt: str = "%A %Y-%m-%d") -> str:
+    week_start = last_monday(date)
+    return f"[[{week_start:%Y%m%d}050000|{week_label(date)}]]"
+
+
+def quarter_link(date: dt.datetime, link_fmt: str = "%A %Y-%m-%d") -> str:
+    quarter = quarter_start(date)
+    quarter_num = utils.month_to_quarter(quarter.month)
+    return f"[[{quarter:%Y%m%d}020000|{quarter.year}Q{quarter_num}]]"
+
+
+def generate_week_plan(date: dt.datetime) -> str:
+    day = partial(day_link, date)
+
+    week = week_label(date)
     week_num = date.isocalendar()[1]
     year = date.year
-    return (
-        trim(
-            f"""
+    return utils.trim(
+        f"""
         ---
         created: {dt.datetime.utcnow():%Y-%m-%dT%H:%M:%S}Z
-        type: note
-        top_level: "#{year}W{week_num:02d}"
+        type: note/plan/week
+        top_level: "#{week}"
+        alias: ["{week}"]
         ---
         # {year} Week {week_num}
-
-        ## TODO
-
-        ## Habits
+        **Quarter:** {quarter_link(date)}
 
         ## Week Plan
-        ### {day(0)}
+        ### TODO
 
+        ### Habits
 
-        ### {day(1)}
-
-
-        ### {day(2)}
-
-
-        ### {day(3)}
-
-
-        ### {day(4)}
-
-
-        ### {day(5)}
-
-
-        ### {day(6)}
+        ## Action Plans
+        - {day(1)}
+        - {day(2)}
+        - {day(3)}
+        - {day(4)}
+        - {day(5)}
+        - {day(6)}
         """
-        )
-        + "\n"
     )
 
 
-def create_plan_file(date: dt.datetime, note_dir: Path) -> Path:
+def generate_day_plan(date: dt.datetime) -> str:
+    day = partial(day_link, date)
+    return utils.trim(
+        f"""
+        ---
+        created: {dt.datetime.utcnow():%Y-%m-%dT%H:%M:%S}Z
+        type: note/plan/day
+        alias: ["{date:%Y-%m-%d}"]
+        ---
+        # {date:%Y-%m-%d}
+        **Week:** {week_link(date)}
+        **Yesterday:** {day(-1)}
+        **Tomorrow:** {day(1)}
+
+        ## Habits
+
+        ## Log
+        """
+    )
+
+
+def create_week_plan_file(date: dt.datetime, note_dir: Path) -> Path:
     filename = f"{date:%Y%m%d}050000.md"
     file = note_dir / filename
     if file.expanduser().exists():
         raise FileExistsError("Weekly plan already exists")
     with open(file.expanduser(), "w") as f:
-        f.write(generate_plan(date))
+        f.write(generate_week_plan(date))
     return file
+
+
+def create_day_plan_file(date: dt.datetime, note_dir: Path) -> Path:
+    filename = f"{date:%Y%m%d}060000.md"
+    file = note_dir / filename
+    if file.expanduser().exists():
+        raise FileExistsError("Daily plan already exists")
+    with open(file.expanduser(), "w") as f:
+        f.write(generate_day_plan(date))
+    return file
+
+
+def quarter_start(date: Optional[dt.datetime] = None) -> dt.datetime:
+    date = date or dt.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    month = date.month - ((date.month - 1) % 3)
+    return date.replace(month=month, day=1, hour=0, minute=0, second=0, microsecond=0)
 
 
 def last_monday(date: Optional[dt.datetime] = None) -> dt.datetime:
     date = date or dt.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    return date - dt.timedelta(days=date.weekday())
+    monday = date - dt.timedelta(days=date.weekday())
+    return monday.replace(hour=0, minute=0, second=0, microsecond=0)
