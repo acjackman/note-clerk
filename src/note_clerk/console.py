@@ -262,8 +262,14 @@ def plan(app: App) -> None:
 
 @plan.command()
 @click.pass_obj
-def week(app: App) -> None:
+@click.option("--next", "next_date", is_flag=True)
+@click.option("--prev", "prev_date", is_flag=True)
+@click.option("--date", "date_text", default=lambda: f"{dt.datetime.now():%Y-%m-%d}")
+def week(app: App, next_date: bool, prev_date: bool, date_text: str) -> None:
     from . import planning
+
+    date = parse_date(date_text)
+    date = planning.determine_date(date, next_date, prev_date)
 
     plan = planning.create_week_plan_file(planning.last_monday(), app.notes_dir)
     click.echo(plan)
@@ -278,13 +284,10 @@ def day(app: App, next_date: bool, prev_date: bool, date_text: str) -> None:
     from . import planning
 
     date = parse_date(date_text)
-
-    if next_date and prev_date:
+    try:
+        date = planning.determine_date(date, next_date, prev_date)
+    except Exception:
         raise ScriptFailed("--next and --prev must not be passed together")
-    elif next_date:
-        date += dt.timedelta(days=1)
-    elif prev_date:
-        date -= dt.timedelta(days=1)
 
     day_plan = planning.create_day_plan_file(date, app.notes_dir)
     click.echo(day_plan)
