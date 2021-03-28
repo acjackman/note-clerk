@@ -70,6 +70,40 @@ def test_create_full_week(
     cli_runner: CliRunner,
     file_factory: FileFactory,
 ) -> None:
+    date = dt.datetime(2021, 3, 15)
+    expected_files = [
+        file_factory(filename="20210315050000.md", path_only=True),
+        file_factory(filename="20210315060000.md", path_only=True),
+        file_factory(filename="20210316060000.md", path_only=True),
+        file_factory(filename="20210317060000.md", path_only=True),
+        file_factory(filename="20210318060000.md", path_only=True),
+        file_factory(filename="20210319060000.md", path_only=True),
+        file_factory(filename="20210320060000.md", path_only=True),
+        file_factory(filename="20210321060000.md", path_only=True),
+    ]
+    expected_file = file_factory(filename=f"{date:%Y%m%d}050000.md", path_only=True)
+    tmpdir = expected_file.parent
+
+    with freeze_time(date):
+        result = cli_runner.invoke(
+            console.cli,
+            [
+                f"--config-dir={str(tmpdir)}",
+                "plan",
+                "full-week",
+            ],
+        )
+
+    show_output(result)
+    assert result.exit_code == 0
+    for file in expected_files:
+        assert file.exists()
+
+
+def test_create_full_week_specific_date(
+    cli_runner: CliRunner,
+    file_factory: FileFactory,
+) -> None:
     date = dt.datetime(2021, 3, 22)
     expected_files = [
         file_factory(filename="20210322050000.md", path_only=True),
