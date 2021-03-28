@@ -271,7 +271,7 @@ def week(app: App, next_date: bool, prev_date: bool, date_text: str) -> None:
     date = parse_date(date_text)
     date = planning.determine_date(date, next_date, prev_date)
 
-    plan = planning.create_week_plan_file(planning.last_monday(), app.notes_dir)
+    plan = planning.create_week_plan_file(planning.last_monday(date), app.notes_dir)
     click.echo(plan)
 
 
