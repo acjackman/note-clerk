@@ -293,6 +293,27 @@ def day(app: App, next_date: bool, prev_date: bool, date_text: str) -> None:
     click.echo(day_plan)
 
 
+@plan.command()
+@click.pass_obj
+@click.option("--next", "next_date", is_flag=True)
+@click.option("--prev", "prev_date", is_flag=True)
+@click.option("--date", "date_text", default=lambda: f"{dt.datetime.now():%Y-%m-%d}")
+def full_week(app: App, next_date: bool, prev_date: bool, date_text: str) -> None:
+    from . import planning
+
+    date = parse_date(date_text)
+    date = planning.determine_date(date, next_date, prev_date)
+    monday = planning.last_monday(date)
+
+    plan = planning.create_week_plan_file(monday, app.notes_dir)
+    click.echo(plan)
+    for i in range(7):
+        day_plan = planning.create_day_plan_file(
+            monday + dt.timedelta(days=i), app.notes_dir
+        )
+        click.echo(day_plan)
+
+
 class ScriptFailed(click.ClickException):
     exit_code = 1
 

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "note-clerk"
-version = "0.0.15"
+version = "0.0.16"
 authors = ["Adam Jackman <adam@acjackman.com>"]
 description = "Utility to manage plain text notes."
 license = "MIT"
