@@ -47,6 +47,25 @@ def test_create_week_plan_file_exists(file_factory: FileFactory) -> None:
         planning.create_week_plan_file(date, preexisting.parent)
 
 
+def test_create_correct_week(
+    cli_runner: CliRunner,
+    file_factory: FileFactory,
+) -> None:
+    date = dt.datetime(2021, 3, 29)
+    expected_file = file_factory(filename=f"{date:%Y%m%d}050000.md", path_only=True)
+    tmpdir = expected_file.parent
+
+    with freeze_time("2021-03-28"):
+        result = cli_runner.invoke(
+            console.cli,
+            [f"--config-dir={str(tmpdir)}", "plan", "week", f"--date={date:%Y-%m-%d}"],
+        )
+
+    show_output(result)
+    assert result.exit_code == 0
+    assert expected_file.exists()
+
+
 @pytest.mark.parametrize(
     "current_date,plan_date,args",
     [
