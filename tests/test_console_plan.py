@@ -66,6 +66,41 @@ def test_create_correct_week(
     assert expected_file.exists()
 
 
+def test_create_full_week(
+    cli_runner: CliRunner,
+    file_factory: FileFactory,
+) -> None:
+    date = dt.datetime(2021, 3, 22)
+    expected_files = [
+        file_factory(filename="20210322050000.md", path_only=True),
+        file_factory(filename="20210322060000.md", path_only=True),
+        file_factory(filename="20210323060000.md", path_only=True),
+        file_factory(filename="20210324060000.md", path_only=True),
+        file_factory(filename="20210325060000.md", path_only=True),
+        file_factory(filename="20210326060000.md", path_only=True),
+        file_factory(filename="20210327060000.md", path_only=True),
+        file_factory(filename="20210328060000.md", path_only=True),
+    ]
+    expected_file = file_factory(filename=f"{date:%Y%m%d}050000.md", path_only=True)
+    tmpdir = expected_file.parent
+
+    with freeze_time("2021-03-21"):
+        result = cli_runner.invoke(
+            console.cli,
+            [
+                f"--config-dir={str(tmpdir)}",
+                "plan",
+                "full-week",
+                f"--date={date:%Y-%m-%d}",
+            ],
+        )
+
+    show_output(result)
+    assert result.exit_code == 0
+    for file in expected_files:
+        assert file.exists()
+
+
 @pytest.mark.parametrize(
     "current_date,plan_date,args",
     [
