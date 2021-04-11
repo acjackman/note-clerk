@@ -44,6 +44,8 @@ def generate_week_plan(date: dt.datetime) -> str:
         ---
         # {year} Week {week_num}
         **Quarter:** {quarter_link(date)}
+        **Previous:** {week_link(date - dt.timedelta(days=7))}
+        **Next:** {week_link(date + dt.timedelta(days=7))}
 
         ## Week Plan
         ### TODO
