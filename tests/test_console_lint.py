@@ -39,7 +39,7 @@ LINT_CASES = [
 ]
 
 
-FAKE_CONTENT = inline_note("a fake note")
+FAKE_CONTENT = inline_note("a fake note", trailing_newline=False)
 
 
 @pytest.fixture
@@ -59,7 +59,7 @@ class LineCheck(linting.LintCheck):
         yield from super().check_line(line, line_num)
 
         if line_num == 1:
-            yield linting.LintError(line_num, 1, "a-fake-error")
+            yield linting.LintError("a-fake-error", line_num, 1)
 
 
 @pytest.fixture
@@ -88,7 +88,7 @@ def test_lint_stdin_dirty(
     print(result.output, end="")
 
     assert result.exit_code == 10
-    assert result.output == f"stdin:1:1 | a-fake-error\n"
+    assert result.output == "stdin:1:1 | a-fake-error\n"
 
 
 def test_lint_file_clean(cli_runner: CliRunner, checks_mock: PropertyMock) -> None:

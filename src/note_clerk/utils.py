@@ -1,9 +1,13 @@
 """Utility Functions for NoteClerk."""
-
+from inspect import cleandoc as multiline_trim
+import logging
+import math
 from pathlib import Path
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, List, Sequence, Tuple
 
 from boltons import iterutils
+
+logger = logging.getLogger(__name__)
 
 
 class FilesNotFound(Exception):
@@ -58,3 +62,60 @@ def quoted_paths(paths: Iterable[Path]) -> str:
 
     """
     return " ".join([f'"{p}"' for p in paths])
+
+
+def ensure_newline(text: str) -> str:
+    if text.endswith("\n"):
+        return text
+    return text + "\n"
+
+
+DOC_SEP = "---"
+DOC_STOP = "***"
+
+
+class UnclosedHeader(Exception):
+    """Unclosed Header found when parsing"""
+
+
+def split_header(lines: Sequence[str]) -> Tuple[str, str]:
+    """Extract header from document."""
+    if lines[0] != DOC_SEP:
+        return "", "\n".join(lines)
+
+    docs: List[str] = []
+    doc = None
+    for _i, line in enumerate(lines):
+        if doc:
+            doc.append(line)
+
+        if line == DOC_SEP:
+            if doc is None:
+                doc = [line]
+            else:
+                docs.append("\n".join(doc))
+                doc = None
+        elif line == DOC_STOP:
+            assert doc is not None  # noqa: S101
+            docs.append("\n".join(doc))
+            doc = None
+            _i += 1
+            break
+        elif doc is None:
+            break
+
+    if doc is not None:
+        raise UnclosedHeader()
+
+    return "\n".join(docs), "\n".join(lines[_i:])
+
+
+def month_to_quarter(x: int) -> int:
+    return math.ceil(x / 3)
+
+
+def trim(text: str, ensure_newline: bool = True) -> str:
+    text = multiline_trim(text).strip()
+    if ensure_newline:
+        return text + "\n"
+    return text

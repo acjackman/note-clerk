@@ -10,4 +10,4 @@ class CheckHeaderTagsArray(HeaderCheck):
 
         if self.in_header and line.startswith("tags:"):
             if not line.startswith("tags: ["):
-                yield LintError(line_num, 5, "header-tags-array")
+                yield LintError("header-tags-array", line_num, 5)

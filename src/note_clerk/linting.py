@@ -11,9 +11,9 @@ log = logging.getLogger(__name__)
 class LintError:
     """Lint error location."""
 
-    line: int
-    column: int
     error: str
+    line: Optional[int]
+    column: Optional[int]
 
 
 Lints = Iterable[LintError]
@@ -22,7 +22,7 @@ Lints = Iterable[LintError]
 class LintCheck(ABC):
     """Lint Check Base Class."""
 
-    def check_filename(self, filename: str) -> Lints:
+    def check_filename(self, filename: Optional[str]) -> Lints:
         """Check filename."""
         yield from ()
 
