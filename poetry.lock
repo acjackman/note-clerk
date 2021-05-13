@@ -64,7 +64,7 @@ stevedore = ">=1.20.0"
 
 [[package]]
 name = "black"
-version = "21.4b1"
+version = "21.5b1"
 description = "The uncompromising code formatter."
 category = "dev"
 optional = false
@@ -80,7 +80,7 @@ toml = ">=0.10.1"
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
-d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
+d = ["aiohttp (>=3.6.0)", "aiohttp-cors"]
 python2 = ["typed-ast (>=1.4.2)"]
 
 [[package]]
@@ -936,7 +936,7 @@ tests = ["pytest", "pytest-cov", "codecov", "scikit-build", "cmake", "ninja", "p
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "3f5630b02612e1149587d64747c09c393bb28cd8897d76aec0cddac34935f9ef"
+content-hash = "f6a3ffd8bbdace35195c4186eb90bf98fcb7cd93951f107be46224617d9ec846"
 
 [metadata.files]
 alabaster = [
@@ -964,8 +964,8 @@ bandit = [
     {file = "bandit-1.7.0.tar.gz", hash = "sha256:8a4c7415254d75df8ff3c3b15cfe9042ecee628a1e40b44c15a98890fbfc2608"},
 ]
 black = [
-    {file = "black-21.4b1-py3-none-any.whl", hash = "sha256:c9601dc863779db2fb1bf18b345bbfa2bb868463123cde6a7eff44b59e4ef739"},
-    {file = "black-21.4b1.tar.gz", hash = "sha256:20d326de75d13be6290925a95c94a9f368aca2f71cb7b753a938a5ae20f34a37"},
+    {file = "black-21.5b1-py3-none-any.whl", hash = "sha256:8a60071a0043876a4ae96e6c69bd3a127dad2c1ca7c8083573eb82f92705d008"},
+    {file = "black-21.5b1.tar.gz", hash = "sha256:23695358dbcb3deafe7f0a3ad89feee5999a46be5fec21f4f1d108be0bcdb3b1"},
 ]
 boltons = [
     {file = "boltons-20.2.1-py2.py3-none-any.whl", hash = "sha256:3dd8a8e3c1886e7f7ba3422b50f55a66e1700161bf01b919d098e7d96dd2d9b6"},
