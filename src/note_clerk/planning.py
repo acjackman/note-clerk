@@ -115,13 +115,18 @@ def last_monday(date: Optional[dt.datetime] = None) -> dt.datetime:
     return monday.replace(hour=0, minute=0, second=0, microsecond=0)
 
 
-def determine_date(
-    date: dt.datetime, _next: bool = False, _prev: bool = False
+def adjust_date(
+    date: dt.datetime,
+    _next: bool = False,
+    _prev: bool = False,
+    delta: dt.timedelta = None,
 ) -> dt.datetime:
+    delta = delta or dt.timedelta(days=1)
+
     if _next and _prev:
         raise Exception("--next and --prev must not be passed together")
     elif _next:
-        date += dt.timedelta(days=1)
+        date += delta
     elif _prev:
-        date -= dt.timedelta(days=1)
+        date -= delta
     return date

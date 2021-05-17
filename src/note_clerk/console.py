@@ -269,7 +269,7 @@ def week(app: App, next_date: bool, prev_date: bool, date_text: str) -> None:
     from . import planning
 
     date = parse_date(date_text)
-    date = planning.determine_date(date, next_date, prev_date)
+    date = planning.adjust_date(date, next_date, prev_date)
 
     plan = planning.create_week_plan_file(planning.last_monday(date), app.notes_dir)
     click.echo(plan)
@@ -285,7 +285,7 @@ def day(app: App, next_date: bool, prev_date: bool, date_text: str) -> None:
 
     date = parse_date(date_text)
     try:
-        date = planning.determine_date(date, next_date, prev_date)
+        date = planning.adjust_date(date, next_date, prev_date)
     except Exception:
         raise ScriptFailed("--next and --prev must not be passed together")
 
@@ -302,8 +302,13 @@ def full_week(app: App, next_date: bool, prev_date: bool, date_text: str) -> Non
     from . import planning
 
     date = parse_date(date_text)
-    date = planning.determine_date(date, next_date, prev_date)
+    logging.debug(f"Parsed date: {date}")
     monday = planning.last_monday(date)
+    logging.debug(f"Monday for that week: {monday}")
+    monday = planning.adjust_date(
+        monday, next_date, prev_date, delta=dt.timedelta(days=7)
+    )
+    logging.debug(f"Adjusted Monday: {monday}")
 
     plan = planning.create_week_plan_file(monday, app.notes_dir)
     click.echo(plan)
