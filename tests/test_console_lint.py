@@ -292,6 +292,63 @@ NOTE_FIX_CASES = [
             ),
         ),
     ),
+    ParamCase(
+        id="FIX_DRAFTS_INBOX",
+        description="combines multiple yaml together maintains multiple key values",
+        variables=FixDetails(
+            content=inline_note(
+                """
+                ---
+                tags: ["#inbox"]
+                created: 2020-03-16T06:15:19.789Z
+                ---
+                ---
+                type: resource/code-snippet
+                tags: ["#sublime"]
+                ...
+                """
+            ),
+            corrected=inline_note(
+                """
+                ---
+                created: 2020-03-16T06:15:19.789Z
+                type: resource/code-snippet
+                tags: ["#inbox", "#sublime"]
+                ...
+                """
+            ),
+        ),
+    ),
+    ParamCase(
+        id="DOES_NOT_FIX_PANDOC_STYLE",
+        description="combines multiple yaml together maintains multiple key values",
+        variables=FixDetails(
+            content=inline_note(
+                """
+                ---
+                tags: ["#inbox"]
+                created: 2020-03-16T06:15:19.789Z
+                ...
+                ---
+                type: resource/code-snippet
+                tags: ["#sublime"]
+                ...
+                """
+            ),
+            corrected=inline_note(
+                """
+                ---
+                tags: ["#inbox"]
+                created: 2020-03-16T06:15:19.789Z
+                ...
+                ---
+                type: resource/code-snippet
+                tags: ["#sublime"]
+                ...
+                """
+            ),
+        ),
+    ),
 ]
 
 
