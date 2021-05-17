@@ -58,6 +58,13 @@ note-clerk = "note_clerk.console:cli"
 [tool.poe.tasks]
 test = "pytest -m 'not e2e'"
 test-cov = "pytest --cov -m 'not e2e'"
+doc-req = { "shell" = """\
+   poetry export -f requirements.txt --dev --without-hashes \
+   | grep -E '^(sphinx|sphinx-autodoc-typehints)==' \
+   | sed 's/;.*//g' \
+   | sort \
+   > docs/requirements.txt \
+   """}
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
