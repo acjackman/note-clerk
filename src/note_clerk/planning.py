@@ -48,9 +48,10 @@ def generate_week_plan(date: dt.datetime) -> str:
         **Next:** {week_link(date + dt.timedelta(days=7))}
 
         ## Week Plan
-        ### TODO
 
         ### Habits
+        
+        ### Plan
 
         ## Action Plans
         - {day(0)}
@@ -79,6 +80,10 @@ def generate_day_plan(date: dt.datetime) -> str:
         **Tomorrow:** {day(1)}
 
         ## Habits
+        
+        
+        ## Plan
+        
 
         ## Log
         """
