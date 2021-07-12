@@ -85,7 +85,7 @@ python2 = ["typed-ast (>=1.4.2)"]
 
 [[package]]
 name = "boltons"
-version = "20.2.1"
+version = "21.0.0"
 description = "When they're not builtins, they're boltons."
 category = "main"
 optional = false
@@ -969,7 +969,7 @@ tests = ["pytest", "pytest-cov", "codecov", "scikit-build", "cmake", "ninja", "p
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "277db34754078aa68ead68b2f566b16efa37759a9e22119679c548e730c13ee5"
+content-hash = "ca20202bbc7bbbb98a5aeacb3cb9b544cc9d680b94ba0effad634c2711ca2251"
 
 [metadata.files]
 alabaster = [
@@ -1001,8 +1001,8 @@ black = [
     {file = "black-21.5b1.tar.gz", hash = "sha256:23695358dbcb3deafe7f0a3ad89feee5999a46be5fec21f4f1d108be0bcdb3b1"},
 ]
 boltons = [
-    {file = "boltons-20.2.1-py2.py3-none-any.whl", hash = "sha256:3dd8a8e3c1886e7f7ba3422b50f55a66e1700161bf01b919d098e7d96dd2d9b6"},
-    {file = "boltons-20.2.1.tar.gz", hash = "sha256:dd362291a460cc1e0c2e91cc6a60da3036ced77099b623112e8f833e6734bdc5"},
+    {file = "boltons-21.0.0-py2.py3-none-any.whl", hash = "sha256:b9bb7b58b2b420bbe11a6025fdef6d3e5edc9f76a42fb467afe7ca212ef9948b"},
+    {file = "boltons-21.0.0.tar.gz", hash = "sha256:65e70a79a731a7fe6e98592ecfb5ccf2115873d01dbc576079874629e5c90f13"},
 ]
 certifi = [
     {file = "certifi-2020.12.5-py2.py3-none-any.whl", hash = "sha256:719a74fb9e33b9bd44cc7f3a8d94bc35e4049deebe19ba7d8e108280cfd59830"},
