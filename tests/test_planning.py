@@ -25,3 +25,8 @@ from note_clerk import planning
 def test_quarter_start(date: dt.datetime, quarter: dt.datetime) -> None:
     adjusted = planning.quarter_start(date)
     assert adjusted == quarter
+
+
+def print_with_header(header: str, text: str) -> None:
+    line = "*" * (len(header) + 4)
+    print(f"{line}\n* {header} *\n{line}\n{text}")
