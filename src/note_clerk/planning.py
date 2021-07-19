@@ -1,9 +1,14 @@
 import datetime as dt
 from functools import partial
+from os import PathLike
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional, Union
+
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from note_clerk import utils
+
+TEMPLATES = Path(__file__).parent / "templates"
 
 
 def day_link(date: dt.datetime, days: int = 0, link_fmt: str = "%Y-%m-%d") -> str:
@@ -17,72 +22,55 @@ def week_label(date: dt.datetime) -> str:
     return f"{date.year}W{week_num:02d}"
 
 
-def week_link(date: dt.datetime, link_fmt: str = "%A %Y-%m-%d") -> str:
+def week_link(date: dt.datetime) -> str:
     week_start = last_monday(date)
     return f"[[{week_start:%Y%m%d}050000|{week_label(date)}]]"
 
 
-def quarter_link(date: dt.datetime, link_fmt: str = "%A %Y-%m-%d") -> str:
+def quarter_link(date: dt.datetime) -> str:
     quarter = quarter_start(date)
     quarter_num = utils.month_to_quarter(quarter.month)
     return f"[[{quarter:%Y%m%d}020000|{quarter.year}Q{quarter_num}]]"
 
 
-def generate_week_plan(date: dt.datetime) -> str:
-    day = partial(day_link, date, link_fmt="%A %Y-%m-%d")
-
-    week = week_label(date)
-    week_num = date.isocalendar()[1]
-    year = date.year
-    return utils.trim(
-        f"""
-        ---
-        created: {dt.datetime.utcnow():%Y-%m-%dT%H:%M:%S}Z
-        type: note/plan/week
-        top_level: "#{week}"
-        alias: ["{week}"]
-        ---
-        # {year} Week {week_num}
-        **Quarter:** {quarter_link(date)}
-        **Previous:** {week_link(date - dt.timedelta(days=7))}
-        **Next:** {week_link(date + dt.timedelta(days=7))}
-
-        ## Week Plan
-        ### TODO
-
-        ### Habits
-
-        ## Action Plans
-        - {day(0)}
-        - {day(1)}
-        - {day(2)}
-        - {day(3)}
-        - {day(4)}
-        - {day(5)}
-        - {day(6)}
-        """
+def get_jinja_env(
+    template_dirs: Optional[Iterable[Union[str, PathLike]]] = None
+) -> Environment:
+    template_dirs = [*(template_dirs or []), TEMPLATES]
+    env = Environment(
+        loader=FileSystemLoader(TEMPLATES),
+        autoescape=select_autoescape(),
     )
+    env.filters["timedelta"] = lambda v, days: v + dt.timedelta(days=days)
+    env.filters["quarter_link"] = quarter_link
+    env.filters["week_link"] = week_link
+    env.filters["strftime"] = lambda value, format: value.strftime(format)
+    return env
 
 
-def generate_day_plan(date: dt.datetime) -> str:
-    day = partial(day_link, date)
-    return utils.trim(
-        f"""
-        ---
-        created: {dt.datetime.utcnow():%Y-%m-%dT%H:%M:%S}Z
-        type: note/plan/day
-        alias: ["{date:%Y-%m-%d}"]
-        ---
-        # {date:%Y-%m-%d}
-        **Week:** {week_link(date)}
-        **Yesterday:** {day(-1)}
-        **Tomorrow:** {day(1)}
+def generate_week_plan(date: dt.datetime, extension: str = "md") -> str:
+    env = get_jinja_env()
+    template = env.get_template(f"week_plan.{extension}")
+    ctx = {
+        "now_utc": dt.datetime.utcnow(),
+        "date": date,
+        "week_label": week_label(date),
+        "week_num": date.isocalendar()[1],
+        "year": date.year,
+        "day": partial(day_link, date, link_fmt="%A %Y-%m-%d"),
+    }
+    return utils.trim(template.render(**ctx))
 
-        ## Habits
 
-        ## Log
-        """
-    )
+def generate_day_plan(date: dt.datetime, extension: str = "md") -> str:
+    env = get_jinja_env()
+    template = env.get_template(f"day_plan.{extension}")
+    ctx = {
+        "now_utc": dt.datetime.utcnow(),
+        "date": date,
+        "day": partial(day_link, date),
+    }
+    return utils.trim(template.render(**ctx))
 
 
 def create_week_plan_file(date: dt.datetime, note_dir: Path) -> Path:
