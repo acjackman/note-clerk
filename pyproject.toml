@@ -33,7 +33,7 @@ pytest = "^6.2.5"
 pytest-mock = "^3.6.1"
 coverage = {extras = ["toml"], version = "^5.5"}
 pytest-cov = "^2.12.1"
-black = "^21.8b0"
+black = "^21.9b0"
 flake8 = "^3.9.1"
 flake8-bandit = "^2.1.2"
 flake8-black = "^0.2.1"
