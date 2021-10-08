@@ -31,7 +31,7 @@ Jinja2 = "^3.0.1"
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
 pytest-mock = "^3.6.1"
-coverage = {extras = ["toml"], version = "^5.5"}
+coverage = {extras = ["toml"], version = "^6.0"}
 pytest-cov = "^2.12.1"
 black = "^21.9b0"
 flake8 = "^3.9.1"
