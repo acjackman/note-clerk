@@ -514,7 +514,7 @@ dev = ["pre-commit", "tox"]
 
 [[package]]
 name = "poethepoet"
-version = "0.12.3"
+version = "0.13.0"
 description = "A task runner that works well with poetry."
 category = "dev"
 optional = false
@@ -1008,7 +1008,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "44ea6a712d1efde0739904cd88d38948b2d5f3f7ac4c22faa98764c5b74ef047"
+content-hash = "06a21abe617ff38b8344bf526859a099c7381202085521d854d18e2791c47556"
 
 [metadata.files]
 alabaster = [
@@ -1341,8 +1341,8 @@ pluggy = [
     {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
 ]
 poethepoet = [
-    {file = "poethepoet-0.12.3-py3-none-any.whl", hash = "sha256:5b645546d6bbda29cb362d563276c85c19e65dc8d84ed4155964f6e639cb3796"},
-    {file = "poethepoet-0.12.3.tar.gz", hash = "sha256:34d6396a5c9c9741d6cb72afb71797a9c522df1c37717ee15d84d73a1b353387"},
+    {file = "poethepoet-0.13.0-py3-none-any.whl", hash = "sha256:761d08d6980e31e167d3525852fabf538f756fd62fbce52be9f34f5545b395d6"},
+    {file = "poethepoet-0.13.0.tar.gz", hash = "sha256:79f1c5d7b75d3737fab981f5524ef715687757eef5428d2b65795dc09440ad8c"},
 ]
 py = [
     {file = "py-1.10.0-py2.py3-none-any.whl", hash = "sha256:3b80836aa6d1feeaa108e046da6423ab8f6ceda6468545ae8d02d9d58d18818a"},
