@@ -50,7 +50,7 @@ sphinx = "^4.4.0"
 sphinx-autodoc-typehints = "^1.17.0"
 codecov = "^2.1.12"
 poethepoet = "^0.13.1"
-freezegun = "^1.1.0"
+freezegun = "^1.2.0"
 pytest-watch = "^4.2.0"
 
 [tool.poetry.scripts]
