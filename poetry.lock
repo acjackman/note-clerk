@@ -307,7 +307,7 @@ flake8 = "*"
 
 [[package]]
 name = "freezegun"
-version = "1.2.0"
+version = "1.2.1"
 description = "Let your Python tests travel through time"
 category = "dev"
 optional = false
@@ -1011,7 +1011,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "39f87ef4245605b3d94233992afd10a0b296141042f3498d80850c3ee9b151e6"
+content-hash = "b66a00077bf3c51cc029a23596b458444dbcc7aa8b671f6a7f4762759aab0cd0"
 
 [metadata.files]
 alabaster = [
@@ -1178,8 +1178,8 @@ flake8-polyfill = [
     {file = "flake8_polyfill-1.0.2-py2.py3-none-any.whl", hash = "sha256:12be6a34ee3ab795b19ca73505e7b55826d5f6ad7230d31b18e106400169b9e9"},
 ]
 freezegun = [
-    {file = "freezegun-1.2.0-py3-none-any.whl", hash = "sha256:93e90676da387a241a7c2ae7ae68af7b95bfe80e952d0bbf3e088342de90a38d"},
-    {file = "freezegun-1.2.0.tar.gz", hash = "sha256:e19563d0b05dcab6dc8ad21c05269004a96998ce2b6b1b8131f1297ae20dd038"},
+    {file = "freezegun-1.2.1-py3-none-any.whl", hash = "sha256:15103a67dfa868ad809a8f508146e396be2995172d25f927e48ce51c0bf5cb09"},
+    {file = "freezegun-1.2.1.tar.gz", hash = "sha256:b4c64efb275e6bc68dc6e771b17ffe0ff0f90b81a2a5189043550b6519926ba4"},
 ]
 gitdb = [
     {file = "gitdb-4.0.7-py3-none-any.whl", hash = "sha256:6c4cc71933456991da20917998acbe6cf4fb41eeaab7d6d67fbc05ecd4c865b0"},
