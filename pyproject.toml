@@ -49,7 +49,7 @@ xdoctest = "^1.0.0"
 sphinx = "^5.0.2"
 sphinx-autodoc-typehints = "^1.18.3"
 codecov = "^2.1.12"
-poethepoet = "^0.13.1"
+poethepoet = "^0.16.5"
 freezegun = "^1.2.1"
 pytest-watch = "^4.2.0"
 
